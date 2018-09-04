@@ -27,8 +27,8 @@ reflector --verbose --latest 8 --sort rate --protocol https \
 
 # Essential stuff (terminal)
 pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
-    netctl networkmanager zsh keychain lsb-release git git-crypt pass pkgfile \
-    neovim python-neovim python2-neovim wipe tmux expect
+    netctl networkmanager zsh keychain lsb-release git git-crypt gopass pass \
+    oath-toolkit pkgfile neovim python-neovim python2-neovim wipe tmux expect
 
 # Essential stuff (graphical)
 grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1

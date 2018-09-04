@@ -168,6 +168,7 @@ install() {
     arch-chroot /mnt /bin/bash <<- EOF
 		echo "Setting timezone and time"
 		ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+		timedatectl set-ntp true
 		hwclock --systohc
 		echo "Generating and setting locale"
 		cat > /etc/locale.gen << END
