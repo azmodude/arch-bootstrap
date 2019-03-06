@@ -75,8 +75,8 @@ pacman -Sy --noconfirm
 pacman -S --noconfirm --needed tomb tomb-kdf steghide advanced-ssh-config myrepos
 
 # install plasma
-pacman -S --needed --noconfirm plasma-meta konsole dolphin kdegraphics-thumbnailers ffmpegthumbs
-systemctl enable sddm.service
+pacman -S --needed --noconfirm gnome gnome-extra gtk2
+systemctl enable gdm.service
 
 # Disable netctl and enable essential services
 systemctl disable netctl && \
@@ -84,7 +84,7 @@ systemctl disable netctl && \
 
 # fix pinentry symbolic link for kde/qt
 # pinentry-gtk2 is default, we do not have that installed right now
-rm /usr/bin/pinentry && ln -s /usr/bin/pinentry-qt /usr/bin/pinentry
+rm /usr/bin/pinentry && ln -s /usr/bin/pinentry-gtk-2 /usr/bin/pinentry
 
 # set keymap(s)
 localectl --no-convert set-keymap de-latin1-nodeadkeys caps:escape

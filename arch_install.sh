@@ -30,11 +30,23 @@ setup() {
     if [ -z "${LUKS_PASSPHRASE}" ]; then
         bootstrap_dialog --title "Disk encryption" --passwordbox "Please enter a strong passphrase for the full disk encryption.\n" 8 60
         LUKS_PASSPHRASE="$dialog_result"
+        bootstrap_dialog --title "Disk encryption" --passwordbox "Please re-enter passphrase to verify.\n" 8 60
+        LUKS_PASSPHRASE_VERIFY="$dialog_result"
+	if [[ "${LUKS_PASSPHRASE}" != "${LUKS_PASSPHRASE_VERIFY}" ]]; then
+	    echo "Passwords did not match."
+	    exit 3
+	fi
     fi
 
     if [ -z "${ROOT_PASSWORD}" ]; then
         bootstrap_dialog --title "Root password" --passwordbox "Please enter a strong password for the root user.\n" 8 60
         ROOT_PASSWORD="$dialog_result"
+        bootstrap_dialog --title "Root password" --passwordbox "Please re-enter passphrase to verify.\n" 8 60
+        ROOT_PASSWORD_VERIFY="$dialog_result"
+	if [[ "${ROOT_PASSWORD}" != "${ROOT_PASSWORD_VERIFY}" ]]; then
+	    echo "Passwords did not match."
+	    exit 3
+	fi
     fi
 
     bootstrap_dialog --title "WARNING" --msgbox "This script will NUKE ${INSTALL_DISK}.\nPress <Enter> to continue or <Esc> to cancel.\n" 6 60
@@ -49,6 +61,7 @@ setup() {
         exit 1
     fi
 
+    if [[ "${INSTALL_DISK}" =~ ^nvme ]]; then PARTPREFIX="p"; else PARTPREFIX=""; fi
     grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1
 }
 preinstall() {
@@ -57,6 +70,12 @@ preinstall() {
     loadkeys de
     [ ! "${VIRT}" ] && ! ping -c 1 -q 8.8.8.8 > /dev/null && wifi-menu
     timedatectl set-ntp true
+    # Set up reflector
+    pacman -Suy --noconfirm --ignore=linux --ignore=linux-headers \
+        --ignore=linux-firmware && \
+        pacman -S --needed --noconfirm reflector
+    reflector --verbose --latest 8 --sort rate --protocol https \
+        --save /etc/pacman.d/mirrorlist
 }
 
 create_luks() {
@@ -64,11 +83,11 @@ create_luks() {
         cryptsetup -v --cipher aes-xts-plain64 --key-size 512 --hash sha512 \
         luksFormat /dev/"${INSTALL_DISK}""${1}"
     echo -n "${LUKS_PASSPHRASE}" | \
-        cryptsetup luksOpen /dev/"${INSTALL_DISK}""${1}" crypt-system
+        cryptsetup open --type luks /dev/"${INSTALL_DISK}""${1}" crypt-system
 }
 
 get_luks_partition_uuid() {
-    echo $(blkid | grep "${INSTALL_DISK}""${1}" | sed -r 's/.*(UUID="[0-9a-z\-]+")\s.*/\1/')
+    echo $(blkid | grep "${INSTALL_DISK}""${1}" | sed -r 's/.*UUID="([0-9a-z\-]+)"\s.*/\1/')
 }
 
 partition_lvm() {
@@ -78,8 +97,8 @@ partition_lvm() {
         set 1 esp on \
         mkpart primary 551MIB 100%
 
-    create_luks 2
-    LUKS_PARTITION_UUID=$(get_luks_partition_uuid 2)
+    create_luks "${PARTPREFIX}"2
+    LUKS_PARTITION_UUID=$(get_luks_partition_uuid "${PARTPREFIX}"2)
 
     pvcreate /dev/mapper/crypt-system
     vgcreate vg-system /dev/mapper/crypt-system
@@ -91,9 +110,9 @@ partition_lvm() {
     swapon /dev/mapper/vg--system-swap
     mount /dev/mapper/vg--system-root /mnt
 
-    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}"1
+    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
     mkdir /mnt/boot
-    mount /dev/"${INSTALL_DISK}"1 /mnt/boot
+    mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
 }
 
 partition_btrfs() {
@@ -105,8 +124,8 @@ partition_btrfs() {
         mkpart primary 551MiB "${SWAP_END}" \
         mkpart primary "${SWAP_END}" 100%
 
-    create_luks 3
-    LUKS_PARTITION_UUID=$(get_luks_partition_uuid 3)
+    create_luks "${PARTPREFIX}"3
+    LUKS_PARTITION_UUID=$(get_luks_partition_uuid "${PARTPREFIX}"3)
 
     mkfs.btrfs -L root /dev/mapper/crypt-system
     mount /dev/mapper/crypt-system /mnt
@@ -124,8 +143,8 @@ partition_btrfs() {
     mount -o subvol=@snapshots,compress=zstd \
         /dev/mapper/crypt-system /mnt/snapshots
 
-    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}"1
-    mount /dev/"${INSTALL_DISK}"1 /mnt/boot
+    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
+    mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
     mkdir -p /mnt/var/cache/pacman
     btrfs subvolume create /mnt/var/cache/pacman/pkg
     btrfs subvolume create /mnt/var/tmp
@@ -168,8 +187,6 @@ install() {
     arch-chroot /mnt /bin/bash <<- EOF
 		echo "Setting timezone and time"
 		ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-		timedatectl set-ntp true
-		hwclock --systohc
 		echo "Generating and setting locale"
 		cat > /etc/locale.gen << END
 		en_US.UTF-8 UTF-8
@@ -193,7 +210,7 @@ install() {
 		MODULES=(${MODULES})
 		BINARIES=()
 		FILES=()
-		HOOKS="base udev autodetect modconf consolefont keyboard keymap block encrypt lvm2 resume filesystems fsck"
+		HOOKS="base systemd autodetect modconf sd-vconsole keyboard block sd-encrypt sd-lvm2 filesystems fsck"
 		COMPRESSION=gzip
 		END
 		mkinitcpio -p linux
@@ -211,14 +228,15 @@ install() {
 		title Arch Linux
 		linux /vmlinuz-linux
 		${INITRD}
-		options cryptdevice=${LUKS_PARTITION_UUID}:crypt-system:allow-discards ${FSPOINTS} consoleblank=120 rw
+		options rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS} consoleblank=120 rw
 		END
 EOF
 }
 
 function tear_down() {
-    umount -R /mnt
-    cryptsetup luksClose crypt-system
+    echo "not implemented"
+#    umount -R /mnt
+#    cryptsetup close crypt-system
 }
 
 if [ "$(id -u)" != 0 ]; then

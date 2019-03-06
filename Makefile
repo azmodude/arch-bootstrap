@@ -1,2 +1,8 @@
+up:
+	vagrant up
+provision:
+	vagrant provision
+shell:
+	vagrant ssh
 clean:
-	vagrant destroy -f && vagrant up
+	vagrant destroy --force
