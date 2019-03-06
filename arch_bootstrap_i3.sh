@@ -21,6 +21,7 @@ common_graphical
 pacman -S --needed --noconfirm lightdm lightdm-webkit2-greeter i3-gaps \
     polkit-gnome pulseaudio xss-lock scrot wmctrl
 common_install_aur polybar i3lock-fancy-git i3lock-color-git
+
 common_remove_yay_user
 common_services
 common_keymap
