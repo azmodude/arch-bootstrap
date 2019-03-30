@@ -71,8 +71,7 @@ preinstall() {
     [ ! "${VIRT}" ] && ! ping -c 1 -q 8.8.8.8 > /dev/null && wifi-menu
     timedatectl set-ntp true
     # Set up reflector
-    pacman -Suy --noconfirm --ignore=linux --ignore=linux-headers \
-        --ignore=linux-firmware && \
+    pacman -Sy && \
         pacman -S --needed --noconfirm reflector
     reflector --verbose --latest 8 --sort rate --protocol https \
         --save /etc/pacman.d/mirrorlist
