@@ -196,7 +196,7 @@ install() {
 		echo "Setting console settings"
 		cat > /etc/vconsole.conf << END
 		KEYMAP=de-latin1-nodeadkeys
-		FONT=ter-114n
+		FONT=eurlatgr
 		END
 		echo "Configuring hostname"
 		echo "${HOSTNAME_FQDN}" > /etc/hostname
