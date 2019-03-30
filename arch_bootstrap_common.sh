@@ -55,7 +55,7 @@ common_graphical() {
     lspci -k | grep -E "(VGA|3D)" | grep -i nvidia && has_nvidia_card=1
     declare -a graphic_packages
     [[ "${is_intel_cpu}" ]] && \
-        graphic_packages=("vulkan-intel" "libva-intel-driver" "libva" "libvdpau-va-gl")
+        graphic_packages=("xf86-video-intel" "vulkan-intel" "libva-intel-driver" "libva" "libvdpau-va-gl")
     [[ "${has_nvidia_card}" ]] && \
         graphic_packages=("nvidia" "nvidia-utils" "libva-vdpau-driver")
     pacman -S --needed --noconfirm mesa xf86-input-libinput xorg xorg-xinit xterm \
