@@ -107,7 +107,7 @@ common_services() {
 
 common_keymap() {
     # set keymap(s)
-    localectl --no-convert set-keymap de-latin1-nodeadkeys caps:escape
+    localectl --no-convert set-keymap de-latin1-nodeadkeys
     localectl --no-convert set-x11-keymap de pc105 nodeadkeys caps:escape
 }
 
