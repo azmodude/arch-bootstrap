@@ -62,8 +62,10 @@ setup() {
     fi
 
     if [[ "${INSTALL_DISK}" =~ ^nvme ]]; then PARTPREFIX="p"; else PARTPREFIX=""; fi
-    grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1
+    grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 || \
+        IS_INTEL_CPU=0
 }
+
 preinstall() {
     [ "${VIRT}" ] && pacman -S --needed --noconfirm parted dialog dosfstools \
         arch-install-scripts
@@ -153,7 +155,7 @@ install() {
     declare -a EXTRA_PACKAGES
     MODULES=""
 
-    if [ "${IS_INTEL_CPU}" ]; then
+    if [[ "${IS_INTEL_CPU}" -eq 1 ]]; then
         EXTRA_PACKAGES=("intel-ucode")
         MODULES="i915"
         set +e
