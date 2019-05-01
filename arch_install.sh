@@ -18,7 +18,7 @@ setup() {
     fi
 
     if [ -z "${DISK_LAYOUT}" ]; then
-        bootstrap_dialog --title "Disk Layout" --inputbox "btrfs or lvm with ext4" 8 60
+        bootstrap_dialog --title "Disk Layout" --inputbox "'btrfs' or 'lvm' with ext4" 8 60
         DISK_LAYOUT="$dialog_result"
     fi
 
@@ -236,8 +236,8 @@ EOF
 
 function tear_down() {
     echo "not implemented"
-#    umount -R /mnt
-#    cryptsetup close crypt-system
+    umount -R /mnt
+    cryptsetup close crypt-system
 }
 
 if [ "$(id -u)" != 0 ]; then
@@ -263,4 +263,4 @@ if [ "${DISK_LAYOUT}" == "btrfs" ]; then
 fi
 
 install
-#tear_down
+tear_down
