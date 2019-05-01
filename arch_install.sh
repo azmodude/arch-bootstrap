@@ -18,7 +18,7 @@ setup() {
     fi
 
     if [ -z "${DISK_LAYOUT}" ]; then
-        bootstrap_dialog --title "Disk Layout" --inputbox "btrfs or lvm" 8 60
+        bootstrap_dialog --title "Disk Layout" --inputbox "btrfs or lvm with ext4" 8 60
         DISK_LAYOUT="$dialog_result"
     fi
 
