@@ -106,7 +106,7 @@ partition_lvm() {
     lvcreate -L "${SWAP_SIZE}" vg-system -n swap
     lvcreate -l 100%FREE vg-system -n root
 
-    mkfs.xfs -L root /dev/mapper/vg--system-root
+    mkfs.ext4 -m 1 -L root /dev/mapper/vg--system-root
     mkswap /dev/mapper/vg--system-swap
     swapon /dev/mapper/vg--system-swap
     mount /dev/mapper/vg--system-root /mnt
