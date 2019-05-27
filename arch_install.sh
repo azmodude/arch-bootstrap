@@ -180,7 +180,10 @@ install() {
     # randomize swap on boot when using btrfs
 	# source: https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption
     if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
+        # create a bogus 1M partition to avoid the kernel re-labeling our
+        # swap on every boot
         mkfs.ext2 -L crypt-swap /dev/"${INSTALL_DISK}"2 1M
+        # identify swap in crypttab with offset 2048 (1M) and use it in fstab
         printf "swap\tLABEL=crypt-swap\t/dev/urandom\tswap,offset=2048,cipher=aes-xts-plain64,size=512\n" > /mnt/etc/crypttab
         printf "\n# encrypted swap\n/dev/mapper/swap\tnone\tswap\tdefaults\t0\t0\n" >> /mnt/etc/fstab
     fi
