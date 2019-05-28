@@ -44,8 +44,8 @@ common_custom_repo() {
 common_essential() {
 # Essential stuff (terminal)
     pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
-        netctl networkmanager zsh keychain lsb-release git git-crypt gopass \
-        pass oath-toolkit xclip xsel pkgfile neovim python-neovim \
+        netctl networkmanager iwd zsh keychain lsb-release git git-crypt \
+        gopass pass oath-toolkit xclip xsel pkgfile neovim python-neovim \
         wipe tmux expect
 }
 
@@ -102,7 +102,7 @@ common_install_aur() {
 common_services() {
     # Disable netctl and enable essential services
     systemctl disable netctl && \
-        systemctl enable gpm sshd NetworkManager NetworkManager-dispatcher
+        systemctl enable gpm sshd NetworkManager NetworkManager-dispatcher iwd
 }
 
 common_keymap() {
@@ -126,3 +126,9 @@ common_lightdm() {
     systemctl enable lightdm
 }
 
+common_networkmanager_iwd() {
+    cat > /etc/NetworkManager/conf.d/wifi_backend.conf <<- EOF
+[device]
+wifi.backend=iwd
+	EOF
+}

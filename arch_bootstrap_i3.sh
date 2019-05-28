@@ -24,4 +24,5 @@ common_install_aur polybar i3lock-fancy-git i3lock-color-git
 
 common_remove_yay_user
 common_services
+common_networkmanager_iwd
 common_keymap
