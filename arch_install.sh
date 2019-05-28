@@ -134,21 +134,28 @@ partition_btrfs() {
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@snapshots
     btrfs subvolume create /mnt/@home
+    btrfs subvolume create /mnt/@docker
+    btrfs subvolume create /mnt/@libvirt
     umount /mnt
 
     mount -o subvol=@,compress=zstd \
         /dev/mapper/crypt-system /mnt
-    mkdir /mnt/{boot,home,snapshots}
+    mkdir /mnt/{boot,home,snapshots,docker,libvirt}
     mount -o subvol=@home,compress=zstd \
         /dev/mapper/crypt-system /mnt/home
     mount -o subvol=@snapshots,compress=zstd \
         /dev/mapper/crypt-system /mnt/snapshots
+    mount -o subvol=@docker,compress=none \
+        /dev/mapper/crypt-system /mnt/docker
+    mount -o subvol=@libvirt,compress=none \
+        /dev/mapper/crypt-system /mnt/libvirt
 
-    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
-    mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
     mkdir -p /mnt/var/cache/pacman
     btrfs subvolume create /mnt/var/cache/pacman/pkg
     btrfs subvolume create /mnt/var/tmp
+
+    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
+    mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
 }
 
 install() {
