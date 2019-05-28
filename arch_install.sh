@@ -138,17 +138,22 @@ partition_btrfs() {
     btrfs subvolume create /mnt/@libvirt
     umount /mnt
 
-    mount -o subvol=@,compress=zstd \
+    mount -o subvol=@ \
         /dev/mapper/crypt-system /mnt
-    mkdir /mnt/{boot,home,snapshots,docker,libvirt}
-    mount -o subvol=@home,compress=zstd \
+    mkdir /mnt/{boot,home,snapshots}
+    mount -o subvol=@home \
         /dev/mapper/crypt-system /mnt/home
-    mount -o subvol=@snapshots,compress=zstd \
+    btrfs property set /mnt compression zstd
+    btrfs property set /mnt/home compression zstd
+
+    mount -o subvol=@snapshots \
         /dev/mapper/crypt-system /mnt/snapshots
+
+    mkdir -p /mnt/var/lib/{docker,libvirt}
     mount -o subvol=@docker,compress=none \
-        /dev/mapper/crypt-system /mnt/docker
+        /dev/mapper/crypt-system /mnt/var/lib/docker
     mount -o subvol=@libvirt,compress=none \
-        /dev/mapper/crypt-system /mnt/libvirt
+        /dev/mapper/crypt-system /mnt/var/lib/libvirt
 
     mkdir -p /mnt/var/cache/pacman
     btrfs subvolume create /mnt/var/cache/pacman/pkg
