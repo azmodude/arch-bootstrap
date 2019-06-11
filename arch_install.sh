@@ -132,6 +132,7 @@ partition_btrfs() {
     mount /dev/mapper/crypt-system /mnt
     # convention: subvolumes used as mountpoints start with @
     btrfs subvolume create /mnt/@
+    btrfs subvolume create /mnt/@swap
     btrfs subvolume create /mnt/@snapshots
     btrfs subvolume create /mnt/@home
     btrfs subvolume create /mnt/@docker
@@ -140,12 +141,14 @@ partition_btrfs() {
 
     mount -o subvol=@ \
         /dev/mapper/crypt-system /mnt
-    mkdir /mnt/{boot,home,snapshots}
+    mkdir /mnt/{boot,home,snapshots,swap}
     mount -o subvol=@home \
         /dev/mapper/crypt-system /mnt/home
     btrfs property set /mnt compression zstd
     btrfs property set /mnt/home compression zstd
 
+    mount -o subvol=@swap \
+        /dev/mapper/crypt-system /mnt/swap
     mount -o subvol=@snapshots \
         /dev/mapper/crypt-system /mnt/snapshots
 
@@ -158,6 +161,15 @@ partition_btrfs() {
     mkdir -p /mnt/var/cache/pacman
     btrfs subvolume create /mnt/var/cache/pacman/pkg
     btrfs subvolume create /mnt/var/tmp
+
+    # create swap file
+    truncate -s 0 /mnt/swap/swapfile
+    chattr +C /mnt/swap/swapfile
+    btrfs property set /mnt/swap/swapfile compression none
+    fallocate -l ${SWAP_SIZE}G /mnt/swap/swapfile
+    chmod 600 /mnt/swap/swapfile
+    mkswap /mnt/swap/swapfile
+    swapon /mnt/swap/swapfile
 
     mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
     mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
@@ -194,10 +206,10 @@ install() {
     if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
         # create a bogus 1M partition to avoid the kernel re-labeling our
         # swap on every boot
-        mkfs.ext2 -L crypt-swap /dev/"${INSTALL_DISK}"2 1M
-        # identify swap in crypttab with offset 2048 (1M) and use it in fstab
-        printf "swap\tLABEL=crypt-swap\t/dev/urandom\tswap,offset=2048,cipher=aes-xts-plain64,size=512\n" > /mnt/etc/crypttab
-        printf "\n# encrypted swap\n/dev/mapper/swap\tnone\tswap\tdefaults\t0\t0\n" >> /mnt/etc/fstab
+#        mkfs.ext2 -L crypt-swap /dev/"${INSTALL_DISK}"2 1M
+#        # identify swap in crypttab with offset 2048 (1M) and use it in fstab
+#        printf "swap\tLABEL=crypt-swap\t/dev/urandom\tswap,offset=2048,cipher=aes-xts-plain64,size=512\n" > /mnt/etc/crypttab
+#        printf "\n# encrypted swap\n/dev/mapper/swap\tnone\tswap\tdefaults\t0\t0\n" >> /mnt/etc/fstab
     fi
 
     arch-chroot /mnt /bin/bash <<- EOF
