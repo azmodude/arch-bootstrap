@@ -167,7 +167,7 @@ partition_btrfs() {
     # set NOCOW on that file
     chattr +C /mnt/swap/file
     # btrfs needs swapfiles to be not compressed and fully allocated
-    btrfs property set /mnt/swap/swapfile compression none
+    btrfs property set /mnt/swap/file compression none
     fallocate -l ${SWAP_SIZE}G /mnt/swap/file
     # set right permissions
     chmod 600 /mnt/swap/file
