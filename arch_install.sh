@@ -163,13 +163,16 @@ partition_btrfs() {
     btrfs subvolume create /mnt/var/tmp
 
     # create swap file
-    truncate -s 0 /mnt/swap/swapfile
-    chattr +C /mnt/swap/swapfile
+    truncate -s 0 /mnt/swap/file
+    # set NOCOW on that file
+    chattr +C /mnt/swap/file
+    # btrfs needs swapfiles to be not compressed and fully allocated
     btrfs property set /mnt/swap/swapfile compression none
-    fallocate -l ${SWAP_SIZE}G /mnt/swap/swapfile
-    chmod 600 /mnt/swap/swapfile
-    mkswap /mnt/swap/swapfile
-    swapon /mnt/swap/swapfile
+    fallocate -l ${SWAP_SIZE}G /mnt/swap/file
+    # set right permissions
+    chmod 600 /mnt/swap/file
+    # finally mkswap on the file
+    mkswap /mnt/swap/file
 
     mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
     mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
@@ -201,15 +204,10 @@ install() {
     pacstrap /mnt base base-devel dialog netctl iw wpa_supplicant efibootmgr \
         terminus-font "${EXTRA_PACKAGES[@]}"
     genfstab -U /mnt >> /mnt/etc/fstab
-    # randomize swap on boot when using btrfs
-	# source: https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption
+
     if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
-        # create a bogus 1M partition to avoid the kernel re-labeling our
-        # swap on every boot
-#        mkfs.ext2 -L crypt-swap /dev/"${INSTALL_DISK}"2 1M
-#        # identify swap in crypttab with offset 2048 (1M) and use it in fstab
-#        printf "swap\tLABEL=crypt-swap\t/dev/urandom\tswap,offset=2048,cipher=aes-xts-plain64,size=512\n" > /mnt/etc/crypttab
-#        printf "\n# encrypted swap\n/dev/mapper/swap\tnone\tswap\tdefaults\t0\t0\n" >> /mnt/etc/fstab
+        # We are using a swap file when using btrfs, put that into fstab
+        printf "\n# swapfile\n/swap/file\tnone\tswap\tdefaults\t0\t0\n" >> /mnt/etc/fstab
     fi
 
     arch-chroot /mnt /bin/bash <<- EOF
