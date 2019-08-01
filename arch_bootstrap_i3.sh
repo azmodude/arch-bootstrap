@@ -20,7 +20,7 @@ common_graphical
 # install i3 and needed packages
 pacman -S --needed --noconfirm i3-gaps \
     polkit-gnome pulseaudio xss-lock scrot wmctrl
-common_install_aur polybar i3lock-fancy-git i3lock-color-git
+common_install_aur polybar i3lock-fancy-git i3lock-color-git luke-st-git
 
 common_remove_yay_user
 common_services

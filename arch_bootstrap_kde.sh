@@ -26,4 +26,5 @@ rm /usr/bin/pinentry && ln -s /usr/bin/pinentry-qt /usr/bin/pinentry
 
 common_remove_yay_user
 common_services
+common_networkmanager_iwd
 common_keymap
