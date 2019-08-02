@@ -13,15 +13,17 @@ common_set_time
 common_reflector
 common_user
 common_essential
+common_makepkg_conf
 common_add_yay_user
 common_install_yay
 common_graphical
 
 # install i3 and needed packages
-pacman -S --needed --noconfirm i3-gaps \
+pacman -S --needed --noconfirm i3-gaps lightdm lightdm-webkit2-greeter \
     polkit-gnome pulseaudio xss-lock scrot wmctrl
-common_install_aur polybar i3lock-fancy-git i3lock-color-git luke-st-git
+common_install_aur polybar i3lock-fancy-git i3lock-color-git st-luke-git
 
+common_lightdm
 common_remove_yay_user
 common_services
 common_networkmanager_iwd
