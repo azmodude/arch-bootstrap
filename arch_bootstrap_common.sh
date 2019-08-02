@@ -132,3 +132,7 @@ common_networkmanager_iwd() {
 wifi.backend=iwd
 	EOF
 }
+
+common_makepkg_conf() {
+    sed -i -r "s/^#MAKEFLAG.*/MAKEFLAGS=\"-j$(nproc)\"/" /etc/makepkg.conf
+}
