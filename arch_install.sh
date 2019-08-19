@@ -158,8 +158,8 @@ partition_btrfs() {
     mount -o subvol=@libvirt,compress=none \
         /dev/mapper/crypt-system /mnt/var/lib/libvirt
 
-    mkdir -p /mnt/var/cache/pacman
-    btrfs subvolume create /mnt/var/cache/pacman/pkg
+    # create extra subvolumes so we don't clobber our / snapshots
+    btrfs subvolume create /mnt/var/cache
     btrfs subvolume create /mnt/var/tmp
 
     # create swap file
