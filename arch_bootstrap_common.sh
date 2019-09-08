@@ -58,8 +58,8 @@ common_graphical() {
         graphic_packages=("xf86-video-intel" "vulkan-intel" "libva-intel-driver" "libva" "libvdpau-va-gl")
     [[ "${has_nvidia_card}" ]] && \
         graphic_packages=("nvidia" "nvidia-utils" "libva-vdpau-driver")
-    pacman -S --needed --noconfirm mesa xf86-input-libinput xorg xorg-xinit xterm \
-        "${graphic_packages[@]}"
+    pacman -S --needed --noconfirm mesa xf86-input-libinput xorg xorg-xinit \
+        xterm "${graphic_packages[@]}"
 }
 
 common_user() {
