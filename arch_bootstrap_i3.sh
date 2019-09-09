@@ -21,12 +21,14 @@ common_graphical
 # install i3 and needed packages
 pacman -S --needed --noconfirm i3-gaps lightdm lightdm-webkit2-greeter arandr \
     polkit-gnome pavucontrol pulseaudio xss-lock scrot wmctrl gtk2 udiskie \
-    dunst rofi
+    dunst rofi compton feh
+# aur
+common_install_aur tomb i3lock-fancy-git i3lock-color-git
+
 # bumblebee stuff
 pacman -S --needed --noconfirm xdg-utils xdotool xorg-prop libnotify \
-    python-psutil python-netifaces
-common_install_aur tomb i3lock-fancy-git i3lock-color-git \
-	bumblebee-status python-i3ipc otf-font-awesome-4
+    python-psutil python-netifaces python-requests
+common_install_aur otf-font-awesome-4 nordic-theme-git nordic-polar-theme-git
 
 common_lightdm
 common_remove_yay_user
