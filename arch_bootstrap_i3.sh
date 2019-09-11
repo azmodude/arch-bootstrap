@@ -24,11 +24,12 @@ pacman -S --needed --noconfirm i3-gaps lightdm lightdm-webkit2-greeter arandr \
     dunst rofi compton feh
 # aur
 common_install_aur tomb i3lock-fancy-git i3lock-color-git
+common_install_aur otf-font-awesome-4 nordic-theme-git nordic-polar-theme-git
 
 # bumblebee stuff
-pacman -S --needed --noconfirm xdg-utils xdotool xorg-prop libnotify \
+pacman -S --needed --noconfirm xdg-utils xdotool xorg-xprop libnotify \
     python-psutil python-netifaces python-requests
-common_install_aur otf-font-awesome-4 nordic-theme-git nordic-polar-theme-git
+common_install_aur python-i3ipc
 
 common_lightdm
 common_remove_yay_user
