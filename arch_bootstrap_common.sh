@@ -9,7 +9,7 @@ uuid=1337
 shell=zsh
 
 # Custom Repository variables
-gpgkeyid=0x6E225D252CEE6476
+gpgkeyid=2500B0062F13CADEEB199BE2A1A520A41200F7A8
 repourl=http://olympus.azmo.ninja:9912
 reponame=azmo
 
@@ -22,8 +22,8 @@ common_reflector() {
     # Set up reflector
     # Do a full upgrade first so we don't run into partial-upgrade issues
     pacman -Suy --noconfirm && pacman -S --needed --noconfirm reflector
-    reflector --verbose --latest 8 --sort rate --protocol https \
-        --save /etc/pacman.d/mirrorlist
+    reflector --verbose --latest 15 --sort rate --protocol https \
+        --country DE --country NL --save /etc/pacman.d/mirrorlist
 }
 
 common_custom_repo() {
