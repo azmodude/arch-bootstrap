@@ -13,6 +13,7 @@ common_set_time
 common_reflector
 common_user
 common_essential
+common_makepkg_conf
 common_add_yay_user
 common_install_yay
 common_graphical
@@ -21,9 +22,10 @@ common_graphical
 pacman -S --needed --noconfirm gnome gnome-extra gtk2
 systemctl enable gdm.service
 # fix pinentry symbolic link
-# pinentry-gnome is retearded, therefore use pinentry-gtk2
+# pinentry-gnome is retarded, therefore use pinentry-gtk2
 rm /usr/bin/pinentry && ln -s /usr/bin/pinentry-gtk-2 /usr/bin/pinentry
 
 common_remove_yay_user
 common_services
+common_networkmanager_iwd
 common_keymap
