@@ -23,7 +23,7 @@ pacman -S --needed --noconfirm i3-gaps lightdm lightdm-webkit2-greeter arandr \
     polkit-gnome pavucontrol pulseaudio xss-lock physlock scrot wmctrl gtk2 \
     udiskie dunst rofi compton feh
 pacman -S --needed --noconfirm tomb i3lock-fancy-git i3lock-color-git \
-    otf-font-awesome-4 nordic-theme-git nordic-polar-theme-git
+    otf-font-awesome-4 nordic-theme-git nordic-polar-theme-git yay
 
 # aur
 #common_install_aur tomb i3lock-fancy-git i3lock-color-git
