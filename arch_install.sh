@@ -18,7 +18,7 @@ setup() {
     fi
 
     if [ -z "${DISK_LAYOUT}" ]; then
-        bootstrap_dialog --title "Disk Layout" --inputbox "'btrfs' or 'lvm' with ext4" 8 60
+        bootstrap_dialog --title "Disk Layout" --inputbox "'btrfs' or 'lvmext4' with ext4 or 'lvmxfs' with xfs" 8 60
         DISK_LAYOUT="$dialog_result"
     fi
 
@@ -107,7 +107,10 @@ partition_lvm() {
     lvcreate -L "${SWAP_SIZE}" vg-system -n swap
     lvcreate -l 100%FREE vg-system -n root
 
-    mkfs.ext4 -m 1 -L root /dev/mapper/vg--system-root
+    [[ ${DISK_LAYOUT} == "lvmext4" ]] && \
+        mkfs.ext4 -m 1 -L root /dev/mapper/vg--system-root
+    [[ ${DISK_LAYOUT} == "lvmxfs" ]] && \
+        mkfs.xfs -L root /dev/mapper/vg--system-root
     mkswap /dev/mapper/vg--system-swap
     swapon /dev/mapper/vg--system-swap
     mount /dev/mapper/vg--system-root /mnt
@@ -195,10 +198,11 @@ install() {
     else
         INITRD="initrd /initramfs-linux.img"
     fi
-    [[ "${DISK_LAYOUT}" == 'lvm' ]] && \
+    if [[ "${DISK_LAYOUT}" == 'lvmext4' ]] || \
+        [[ "${DISK_LAYOUT}" == 'lvmxfs' ]]; then
         FSPOINTS="resume=/dev/mapper/vg--system-swap root=/dev/mapper/vg--system-root"
-    # hibernate on encrypted swap is a pain in the ass without lvm
-    if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
+    elif [[ "${DISK_LAYOUT}" == 'btrfs' ]]; then
+        # hibernate on encrypted swap is a pain in the ass without lvm
         FSPOINTS="root=/dev/mapper/crypt-system rootflags=subvol=@"
         EXTRA_PACKAGES+=("btrfs-progs")
     fi
@@ -282,8 +286,10 @@ hash bc 2>/dev/null || { echo >&2 "bc required"; exit 1; }
 setup
 preinstall
 
-[[ "${DISK_LAYOUT}" == "lvm" ]] && partition_lvm
-if [ "${DISK_LAYOUT}" == "btrfs" ]; then
+if [[ "${DISK_LAYOUT}" == "lvmext4" ]] || \
+    [[ "${DISK_LAYOUT}" == "lvmxfs" ]]; then
+    partition_lvm
+elif [[ "${DISK_LAYOUT}" == "btrfs" ]]; then
     hash mkfs.btrfs 2>/dev/null || { echo >&2 "btrfs-progs required"; exit 1; }
     partition_btrfs
 fi
