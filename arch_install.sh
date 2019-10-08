@@ -76,7 +76,7 @@ preinstall() {
     pacman -Sy && \
         pacman -S --needed --noconfirm reflector
     reflector --verbose --latest 15 --sort rate --protocol https \
-        --country DE --country NL --save /etc/pacman.d/mirrorlist
+        --country DE --country NL --save /etc/pacman.d/mirrorlist \
         --save /etc/pacman.d/mirrorlist
 }
 
@@ -188,7 +188,7 @@ install() {
 
     if [[ "${IS_INTEL_CPU}" -eq 1 ]]; then
         EXTRA_PACKAGES=("intel-ucode")
-        MODULES="i915"
+        MODULES="intel_agp i915"
         set +e
         read -r -d '' INITRD <<- EOM
 			initrd /intel-ucode.img
@@ -201,13 +201,14 @@ install() {
     if [[ "${DISK_LAYOUT}" == 'lvmext4' ]] || \
         [[ "${DISK_LAYOUT}" == 'lvmxfs' ]]; then
         FSPOINTS="resume=/dev/mapper/vg--system-swap root=/dev/mapper/vg--system-root"
+	[[ "${DISK_LAYOUT}" == 'lvmxfs' ]] && EXTRA_PACKAGES+=("xfsprogs")
     elif [[ "${DISK_LAYOUT}" == 'btrfs' ]]; then
         # hibernate on encrypted swap is a pain in the ass without lvm
         FSPOINTS="root=/dev/mapper/crypt-system rootflags=subvol=@"
         EXTRA_PACKAGES+=("btrfs-progs")
     fi
-    pacstrap /mnt base base-devel dialog netctl iw wpa_supplicant efibootmgr \
-        terminus-font "${EXTRA_PACKAGES[@]}"
+    pacstrap /mnt base base-devel dialog dhcpcd netctl iw wpa_supplicant efibootmgr \
+        linux lvm2 cryptsetup terminus-font "${EXTRA_PACKAGES[@]}"
     genfstab -U /mnt >> /mnt/etc/fstab
 
     if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
@@ -250,10 +251,12 @@ install() {
 		echo "vfat" > /etc/modules-load.d/vfat.conf
 		echo "Installing bootloader"
 		bootctl --path=/boot install
+		bootctl random-seed
 		cat > /boot/loader/loader.conf << END
 		default archlinux
 		timeout 3
-		editor 0
+		editor no
+		console-mode max
 		END
 		cat > /boot/loader/entries/archlinux.conf << END
 		title Arch Linux
