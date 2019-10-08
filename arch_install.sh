@@ -208,7 +208,8 @@ install() {
         EXTRA_PACKAGES+=("btrfs-progs")
     fi
     pacstrap /mnt base base-devel dialog dhcpcd netctl iw wpa_supplicant efibootmgr \
-        linux lvm2 cryptsetup terminus-font "${EXTRA_PACKAGES[@]}"
+        linux linux-firmware lvm2 cryptsetup terminus-font \
+        "${EXTRA_PACKAGES[@]}"
     genfstab -U /mnt >> /mnt/etc/fstab
 
     if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
