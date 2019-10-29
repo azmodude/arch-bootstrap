@@ -3,10 +3,12 @@
 # User variables
 user=azmo
 group=users
-# comma separate
+# comma separate groups
 additional_groups=wheel
 uuid=1337
 shell=zsh
+
+packager="Gordon Schulz <gordon.schulz@gmail.com>"
 
 # Custom Repository variables
 gpgkeyid=2500B0062F13CADEEB199BE2A1A520A41200F7A8
@@ -135,4 +137,5 @@ wifi.backend=iwd
 
 common_makepkg_conf() {
     sed -i -r "s/^#MAKEFLAG.*/MAKEFLAGS=\"-j$(nproc)\"/" /etc/makepkg.conf
+    sed -i -r "s/^#PACKAGER.*/PACKAGER=\"${packager}\"/" /etc/makepkg.conf
 }
