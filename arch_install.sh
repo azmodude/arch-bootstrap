@@ -32,10 +32,10 @@ setup() {
         LUKS_PASSPHRASE="$dialog_result"
         bootstrap_dialog --title "Disk encryption" --passwordbox "Please re-enter passphrase to verify.\n" 8 60
         LUKS_PASSPHRASE_VERIFY="$dialog_result"
-	if [[ "${LUKS_PASSPHRASE}" != "${LUKS_PASSPHRASE_VERIFY}" ]]; then
-	    echo "Passwords did not match."
-	    exit 3
-	fi
+        if [[ "${LUKS_PASSPHRASE}" != "${LUKS_PASSPHRASE_VERIFY}" ]]; then
+            echo "Passwords did not match."
+            exit 3
+        fi
     fi
 
     if [ -z "${ROOT_PASSWORD}" ]; then
@@ -43,10 +43,10 @@ setup() {
         ROOT_PASSWORD="$dialog_result"
         bootstrap_dialog --title "Root password" --passwordbox "Please re-enter passphrase to verify.\n" 8 60
         ROOT_PASSWORD_VERIFY="$dialog_result"
-	if [[ "${ROOT_PASSWORD}" != "${ROOT_PASSWORD_VERIFY}" ]]; then
-	    echo "Passwords did not match."
-	    exit 3
-	fi
+        if [[ "${ROOT_PASSWORD}" != "${ROOT_PASSWORD_VERIFY}" ]]; then
+            echo "Passwords did not match."
+            exit 3
+        fi
     fi
 
     bootstrap_dialog --title "WARNING" --msgbox "This script will NUKE ${INSTALL_DISK}.\nPress <Enter> to continue or <Esc> to cancel.\n" 6 60
@@ -191,17 +191,17 @@ install() {
         MODULES="intel_agp i915"
         set +e
         read -r -d '' INITRD <<- EOM
-			initrd /intel-ucode.img
-			initrd /initramfs-linux.img
-		EOM
-		set -e
+            initrd /intel-ucode.img
+            initrd /initramfs-linux.img
+        EOM
+        set -e
     else
         INITRD="initrd /initramfs-linux.img"
     fi
     if [[ "${DISK_LAYOUT}" == 'lvmext4' ]] || \
         [[ "${DISK_LAYOUT}" == 'lvmxfs' ]]; then
         FSPOINTS="resume=/dev/mapper/vg--system-swap root=/dev/mapper/vg--system-root"
-	[[ "${DISK_LAYOUT}" == 'lvmxfs' ]] && EXTRA_PACKAGES+=("xfsprogs")
+    [[ "${DISK_LAYOUT}" == 'lvmxfs' ]] && EXTRA_PACKAGES+=("xfsprogs")
     elif [[ "${DISK_LAYOUT}" == 'btrfs' ]]; then
         # hibernate on encrypted swap is a pain in the ass without lvm
         FSPOINTS="root=/dev/mapper/crypt-system rootflags=subvol=@"
@@ -218,53 +218,53 @@ install() {
     fi
 
     arch-chroot /mnt /bin/bash <<- EOF
-		echo "Setting timezone and time"
-		ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-		echo "Generating and setting locale"
-		cat > /etc/locale.gen << END
-		en_US.UTF-8 UTF-8
-		de_DE.UTF-8 UTF-8
-		END
-		locale-gen
-		echo "LANG=en_US.UTF-8" > /etc/locale.conf
-		echo "Setting console settings"
-		cat > /etc/vconsole.conf << END
-		KEYMAP=de-latin1-nodeadkeys
-		FONT=eurlatgr
-		END
-		echo "Configuring hostname"
-		echo "${HOSTNAME_FQDN}" > /etc/hostname
-		cat > /etc/hosts << END
-		127.0.0.1   localhost.localdomain localhost
-		127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
-		END
-		echo "Generating mkinitcpio.conf"
-		cat > /etc/mkinitcpio.conf << END
-		MODULES=(${MODULES})
-		BINARIES=()
-		FILES=()
-		HOOKS="base systemd autodetect modconf sd-vconsole keyboard block sd-encrypt sd-lvm2 filesystems fsck"
-		COMPRESSION=gzip
-		END
-		mkinitcpio -p linux
-		echo "Setting root passwd"
-		echo "root:${ROOT_PASSWORD}" | chpasswd
-		echo "vfat" > /etc/modules-load.d/vfat.conf
-		echo "Installing bootloader"
-		bootctl --path=/boot install
-		bootctl random-seed
-		cat > /boot/loader/loader.conf << END
-		default archlinux
-		timeout 3
-		editor no
-		console-mode max
-		END
-		cat > /boot/loader/entries/archlinux.conf << END
-		title Arch Linux
-		linux /vmlinuz-linux
-		${INITRD}
-		options rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS} consoleblank=120 rw
-		END
+        echo "Setting timezone and time"
+        ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+        echo "Generating and setting locale"
+        cat > /etc/locale.gen << END
+        en_US.UTF-8 UTF-8
+        de_DE.UTF-8 UTF-8
+        END
+        locale-gen
+        echo "LANG=en_US.UTF-8" > /etc/locale.conf
+        echo "Setting console settings"
+        cat > /etc/vconsole.conf << END
+        KEYMAP=de-latin1-nodeadkeys
+        FONT=eurlatgr
+        END
+        echo "Configuring hostname"
+        echo "${HOSTNAME_FQDN}" > /etc/hostname
+        cat > /etc/hosts << END
+        127.0.0.1   localhost.localdomain localhost
+        127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
+        END
+        echo "Generating mkinitcpio.conf"
+        cat > /etc/mkinitcpio.conf << END
+        MODULES=(${MODULES})
+        BINARIES=()
+        FILES=()
+        HOOKS="base systemd autodetect modconf sd-vconsole keyboard block sd-encrypt sd-lvm2 filesystems fsck"
+        COMPRESSION=gzip
+        END
+        mkinitcpio -p linux
+        echo "Setting root passwd"
+        echo "root:${ROOT_PASSWORD}" | chpasswd
+        echo "vfat" > /etc/modules-load.d/vfat.conf
+        echo "Installing bootloader"
+        bootctl --path=/boot install
+        bootctl random-seed
+        cat > /boot/loader/loader.conf << END
+        default archlinux
+        timeout 3
+        editor no
+        console-mode max
+        END
+        cat > /boot/loader/entries/archlinux.conf << END
+        title Arch Linux
+        linux /vmlinuz-linux
+        ${INITRD}
+        options rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS} consoleblank=120 rw
+        END
 EOF
 }
 
