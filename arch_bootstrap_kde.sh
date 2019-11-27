@@ -13,6 +13,7 @@ common_set_time
 common_reflector
 common_user
 common_essential
+common_makepkg_conf
 common_add_yay_user
 common_install_yay
 common_graphical
