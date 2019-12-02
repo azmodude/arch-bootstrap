@@ -89,7 +89,7 @@ common_add_yay_user() {
 }
 common_install_yay() {
     tmpdir=$(mktemp -d) && chown -R yay "${tmpdir}"
-    su -l -c "git clone https://aur.archlinux.org/yay.git ${tmpdir}" yay
+    su -l -c "git clone https://aur.archlinux.org/yay-bin.git ${tmpdir}" yay
     su -l -c "cd ${tmpdir} && makepkg -srci --noconfirm --needed" yay
 }
 common_remove_yay_user() {
