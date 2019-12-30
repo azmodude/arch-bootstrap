@@ -156,7 +156,7 @@ partition_btrfs() {
     mount -o subvol=@swap \
         /dev/mapper/crypt-system /mnt/swap
     mount -o subvol=@snapshots \
-        /dev/mapper/crypt-system /mnt/snapshots
+        /dev/mapper/crypt-system /mnt/.snapshots
 
     mkdir -p /mnt/var/lib/{docker,libvirt}
     mount -o subvol=@docker,compress=none \
