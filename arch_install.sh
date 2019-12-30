@@ -64,6 +64,8 @@ setup() {
     if [[ "${INSTALL_DISK}" =~ ^nvme ]]; then PARTPREFIX="p"; else PARTPREFIX=""; fi
     grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 || \
         IS_INTEL_CPU=0
+    grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 || \
+        IS_AMD_CPU=0
 }
 
 preinstall() {
@@ -192,6 +194,15 @@ install() {
         set +e
         read -r -d '' INITRD <<- EOM
 			initrd /intel-ucode.img
+			initrd /initramfs-linux.img
+EOM
+        set -e
+    elif [[ "${IS_AMD_CPU}" -eq 1 ]]; then
+        EXTRA_PACKAGES=("amd-ucode")
+        MODULES="amdgpu"
+        set +e
+        read -r -d '' INITRD <<- EOM
+			initrd /amd-ucode.img
 			initrd /initramfs-linux.img
 EOM
         set -e
