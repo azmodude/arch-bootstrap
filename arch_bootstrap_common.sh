@@ -6,6 +6,7 @@ group=users
 # comma separate groups
 additional_groups=wheel
 uuid=1337
+ggid=1000
 shell=zsh
 
 packager="Gordon Schulz <gordon.schulz@gmail.com>"
@@ -70,6 +71,7 @@ common_user() {
         echo; echo "Adding ${user}"
         useradd -u ${uuid} -m -g ${group} -G ${additional_groups} \
             -s /usr/bin/${shell} ${user}
+        groupmod -g ${ggid} ${group}
         passwd ${user}
     fi
     if ! [ -f /etc/sudoers.d/${user} ]; then
