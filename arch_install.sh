@@ -147,7 +147,7 @@ partition_btrfs() {
 
     mount -o subvol=@ \
         /dev/mapper/crypt-system /mnt
-    mkdir /mnt/{boot,home,snapshots,swap}
+    mkdir /mnt/{boot,home,.snapshots,swap}
     mount -o subvol=@home \
         /dev/mapper/crypt-system /mnt/home
     btrfs property set /mnt compression zstd
