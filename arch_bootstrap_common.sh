@@ -100,7 +100,8 @@ common_remove_yay_user() {
 }
 
 common_install_aur() {
-    sudo -u yay -i -H yay -Sy --pgpfetch --noconfirm --needed "${@}"
+    sudo -u yay -i -H yay -Sy --cleanafter --removemake --pgpfetch \
+        --noconfirm --needed "${@}"
 }
 
 common_services() {
