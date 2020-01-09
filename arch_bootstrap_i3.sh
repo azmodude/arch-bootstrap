@@ -6,7 +6,7 @@ if [ "$(id -u)" != 0 ]; then
     echo "Please execute with root rights."
     exit 1
 fi
-curdir="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" >/dev/null 2>&1 && pwd  )"
+curdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 source "${curdir}/arch_bootstrap_common.sh"
 
 common_set_time
@@ -25,7 +25,7 @@ pacman -S --needed --noconfirm i3-gaps i3status \
     adwaita-icon-theme polkit-gnome brightnessctl feh compton kitty
 
 # aur
-common_install_aur tomb i3lock-fancy-git i3lock-color-git
+common_install_aur tomb i3lock-fancy-git
 common_install_aur otf-font-awesome-4
 
 common_remove_yay_user
