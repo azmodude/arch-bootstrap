@@ -2,11 +2,13 @@
 
 # User variables
 user=azmo
-group=users
-# comma separate groups
-additional_groups=wheel
 uuid=1337
-ggid=1000
+user_fullname="Gordon Schulz"
+primarygroup=azmo
+primarygid=1000
+# comma separate groups
+additional_groups=wheel,users
+usersgid=100
 shell=zsh
 
 packager="Gordon Schulz <gordon.schulz@gmail.com>"
@@ -67,12 +69,16 @@ common_graphical() {
 
 common_user() {
     # Create and setup new user
-    if ! getent passwd ${user} > /dev/null; then
-        echo; echo "Adding ${user}"
-        useradd -u ${uuid} -m -g ${group} -G ${additional_groups} \
-            -s /usr/bin/${shell} ${user}
-        groupmod -g ${ggid} ${group}
-        passwd ${user}
+    if ! getent passwd ${user} >/dev/null; then
+        echo
+        echo "Adding ${user}"
+        groupadd -g "${primarygid}" "${primarygroup}"
+        groupadd -g "${usersgid}" users || groupmod -g "${usersgid}" users
+
+        useradd -u "${uuid}" -m -g "${primarygroup}" -G "${additional_groups}" \
+            -s "/usr/bin/${shell}" "${user}"
+        chfn --full-name "${user_fullname}" "${user}"
+        passwd "${user}"
     fi
     if ! [ -f /etc/sudoers.d/${user} ]; then
 		cat > /etc/sudoers.d/${user} <<- EOF
