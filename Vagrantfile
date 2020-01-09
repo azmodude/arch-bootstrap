@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
     # enable ssh forwarding
     arch.ssh.forward_agent = true
 
-#    arch.vm.synced_folder './', '/vagrant', type: 'rsync'
+    arch.vm.synced_folder '.', '/vagrant', type: 'sshfs'
     # as we are using a GUI, modify VM to accomodate for that
     arch.vm.provider :virtualbox do |vb|
       disk_file = 'arch_install.vdi'
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
         pacman-key --init && pacman-key --populate archlinux && \
             pacman -Syw --noconfirm archlinux-keyring && \
             pacman --noconfirm -S archlinux-keyring
-		pacman -S --noconfirm dialog bc
+		pacman -S --noconfirm dialog bc lvm2 cryptsetup btrfs-progs xfsprogs
     SHELL
   end
 end
