@@ -38,19 +38,19 @@ common_custom_repo() {
     pacman-key --lsign-key ${gpgkeyid}
     # Enable custom Repository in pacman.conf
     if ! grep -E -q "^\\[${reponame}\\]" /etc/pacman.conf; then
-        cat >> /etc/pacman.conf <<- EOF
+        cat >>/etc/pacman.conf <<-EOF
 			[${reponame}]
 			SigLevel = Required TrustedOnly
 			Server = ${repourl}
 		EOF
-	fi
+    fi
 }
 
 common_essential() {
-# Essential stuff (terminal)
+    # Essential stuff (terminal)
     pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
         netctl networkmanager iwd zsh keychain lsb-release git git-crypt \
-        gopass pass oath-toolkit xclip xsel pkgfile neovim python-neovim \
+        gopass pass oath-toolkit xclip xsel neovim python-neovim \
         wipe tmux expect
 }
 
@@ -59,9 +59,9 @@ common_graphical() {
     grep vendor_id /proc/cpuinfo | grep -q Intel && is_intel_cpu=1
     lspci -k | grep -E "(VGA|3D)" | grep -i nvidia && has_nvidia_card=1
     declare -a graphic_packages
-    [[ "${is_intel_cpu}" ]] && \
+    [[ "${is_intel_cpu}" ]] &&
         graphic_packages=("xf86-video-intel" "vulkan-intel" "libva-intel-driver" "libva" "libvdpau-va-gl")
-    [[ "${has_nvidia_card}" ]] && \
+    [[ "${has_nvidia_card}" ]] &&
         graphic_packages=("nvidia" "nvidia-utils" "libva-vdpau-driver")
     pacman -S --needed --noconfirm mesa xf86-input-libinput xorg xorg-xinit \
         xterm "${graphic_packages[@]}"
@@ -80,8 +80,8 @@ common_user() {
         chfn --full-name "${user_fullname}" "${user}"
         passwd "${user}"
     fi
-    if ! [ -f /etc/sudoers.d/${user} ]; then
-		cat > /etc/sudoers.d/${user} <<- EOF
+    if ! [ -f "/etc/sudoers.d/${user}" ]; then
+        cat >"/etc/sudoers.d/${user}" <<-EOF
 			${user} ALL=(ALL) ALL
 		EOF
     fi
@@ -89,11 +89,11 @@ common_user() {
 
 common_add_yay_user() {
     useradd -m -p yay yay
-    echo "yay ALL=(ALL) NOPASSWD: /usr/bin/pacman" > /etc/sudoers.d/yay
-    mkdir /home/yay/.gnupg && \
+    echo "yay ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/yay
+    mkdir /home/yay/.gnupg &&
         echo "keyserver-options auto-key-retrieve" > \
-        /home/yay/.gnupg/gpg.conf && \
-    chown -R yay /home/yay/.gnupg
+            /home/yay/.gnupg/gpg.conf &&
+        chown -R yay /home/yay/.gnupg
 }
 common_install_yay() {
     tmpdir=$(mktemp -d) && chown -R yay "${tmpdir}"
@@ -112,7 +112,7 @@ common_install_aur() {
 
 common_services() {
     # Disable netctl and enable essential services
-    systemctl disable netctl && \
+    systemctl disable netctl &&
         systemctl enable gpm sshd NetworkManager NetworkManager-dispatcher iwd
 }
 
@@ -128,17 +128,17 @@ common_lightdm() {
         mkdir /etc/lightdm/lightdm.conf.d
     fi
     if [[ ! -f /etc/lightdm/lightdm.conf.d/webkit2.conf ]]; then
-		cat > /etc/lightdm/lightdm.conf.d/webkit2.conf <<- EOF
+        cat >/etc/lightdm/lightdm.conf.d/webkit2.conf <<-EOF
 		[Seat:*]
 		greeter-session=lightdm-webkit2-greeter
 		EOF
-	fi
+    fi
     # Enable lightdm
     systemctl enable lightdm
 }
 
 common_networkmanager_iwd() {
-    cat > /etc/NetworkManager/conf.d/wifi_backend.conf <<- EOF
+    cat >/etc/NetworkManager/conf.d/wifi_backend.conf <<-EOF
 [device]
 wifi.backend=iwd
 	EOF
