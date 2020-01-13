@@ -20,7 +20,7 @@ common_graphical
 
 # install i3 and needed packages
 pacman -S --needed --noconfirm i3-gaps i3status \
-    arandr pavucontrol pulseaudio xss-lock \
+    arandr pavucontrol pulseaudio xss-lock physlock \
     scrot wmctrl gtk3 gtk2 udiskie dunst rofi compton gnome-themes-extra \
     adwaita-icon-theme polkit-gnome brightnessctl feh compton kitty
 
