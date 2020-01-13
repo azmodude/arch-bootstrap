@@ -145,6 +145,11 @@ wifi.backend=iwd
 }
 
 common_makepkg_conf() {
+    # number of processors
     sed -i -r "s/^#MAKEFLAG.*/MAKEFLAGS=\"-j$(nproc)\"/" /etc/makepkg.conf
+    # packager
     sed -i -r "s/^#PACKAGER.*/PACKAGER=\"${packager}\"/" /etc/makepkg.conf
+    # change default compression to zstd
+    sed -i -r "s/^PKGEXT='.*'$/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
+
 }
