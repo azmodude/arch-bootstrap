@@ -113,7 +113,7 @@ common_install_aur() {
 common_services() {
     # Disable netctl and enable essential services
     systemctl disable netctl &&
-        systemctl enable gpm sshd systemd-resolvd systemd-networkd \
+        systemctl enable gpm sshd systemd-resolved systemd-networkd \
             NetworkManager NetworkManager-dispatcher iwd
 }
 
