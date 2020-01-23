@@ -62,9 +62,9 @@ setup() {
     fi
 
     if [[ "${INSTALL_DISK}" =~ ^nvme ]]; then PARTPREFIX="p"; else PARTPREFIX=""; fi
-    grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 || \
+    grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 ||
         IS_INTEL_CPU=0
-    grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 || \
+    grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 ||
         IS_AMD_CPU=0
 }
 
@@ -72,10 +72,10 @@ preinstall() {
     [ "${VIRT}" ] && pacman -S --needed --noconfirm parted dialog dosfstools \
         arch-install-scripts
     loadkeys de
-    [ ! "${VIRT}" ] && ! ping -c 1 -q 8.8.8.8 > /dev/null && wifi-menu
+    [ ! "${VIRT}" ] && ! ping -c 1 -q 8.8.8.8 >/dev/null && wifi-menu
     timedatectl set-ntp true
     # Set up reflector
-    pacman -Sy && \
+    pacman -Sy &&
         pacman -S --needed --noconfirm reflector
     reflector --verbose --latest 15 --sort rate --protocol https \
         --country DE --country NL --save /etc/pacman.d/mirrorlist \
@@ -83,10 +83,10 @@ preinstall() {
 }
 
 create_luks() {
-    echo -n "${LUKS_PASSPHRASE}" | \
+    echo -n "${LUKS_PASSPHRASE}" |
         cryptsetup -v --cipher aes-xts-plain64 --key-size 512 --hash sha512 \
-        luksFormat /dev/"${INSTALL_DISK}""${1}"
-    echo -n "${LUKS_PASSPHRASE}" | \
+            luksFormat /dev/"${INSTALL_DISK}""${1}"
+    echo -n "${LUKS_PASSPHRASE}" |
         cryptsetup open --type luks /dev/"${INSTALL_DISK}""${1}" crypt-system
 }
 
@@ -109,9 +109,9 @@ partition_lvm() {
     lvcreate -L "${SWAP_SIZE}" vg-system -n swap
     lvcreate -l 100%FREE vg-system -n root
 
-    [[ ${DISK_LAYOUT} == "lvmext4" ]] && \
+    [[ ${DISK_LAYOUT} == "lvmext4" ]] &&
         mkfs.ext4 -m 1 -L root /dev/mapper/vg--system-root
-    [[ ${DISK_LAYOUT} == "lvmxfs" ]] && \
+    [[ ${DISK_LAYOUT} == "lvmxfs" ]] &&
         mkfs.xfs -L root /dev/mapper/vg--system-root
     mkswap /dev/mapper/vg--system-swap
     swapon /dev/mapper/vg--system-swap
@@ -161,7 +161,7 @@ partition_btrfs() {
     mkdir -p /mnt/var/lib/{docker,libvirt}
     mount -o subvol=@docker,compress=none \
         /dev/mapper/crypt-system /mnt/var/lib/docker
-    mount -o subvol=@libvirt,compress=none \
+    mount -o subvol=@libvirt,compress=none,nodatacow \
         /dev/mapper/crypt-system /mnt/var/lib/libvirt
 
     # create extra subvolumes so we don't clobber our / snapshots
@@ -192,7 +192,7 @@ install() {
         EXTRA_PACKAGES=("intel-ucode")
         MODULES="intel_agp i915"
         set +e
-        read -r -d '' INITRD <<- EOM
+        read -r -d '' INITRD <<-EOM
 			initrd /intel-ucode.img
 			initrd /initramfs-linux.img
 EOM
@@ -201,7 +201,7 @@ EOM
         EXTRA_PACKAGES=("amd-ucode")
         MODULES="amdgpu"
         set +e
-        read -r -d '' INITRD <<- EOM
+        read -r -d '' INITRD <<-EOM
 			initrd /amd-ucode.img
 			initrd /initramfs-linux.img
 EOM
@@ -209,10 +209,10 @@ EOM
     else
         INITRD="initrd /initramfs-linux.img"
     fi
-    if [[ "${DISK_LAYOUT}" == 'lvmext4' ]] || \
+    if [[ "${DISK_LAYOUT}" == 'lvmext4' ]] ||
         [[ "${DISK_LAYOUT}" == 'lvmxfs' ]]; then
         FSPOINTS="resume=/dev/mapper/vg--system-swap root=/dev/mapper/vg--system-root"
-    [[ "${DISK_LAYOUT}" == 'lvmxfs' ]] && EXTRA_PACKAGES+=("xfsprogs")
+        [[ "${DISK_LAYOUT}" == 'lvmxfs' ]] && EXTRA_PACKAGES+=("xfsprogs")
     elif [[ "${DISK_LAYOUT}" == 'btrfs' ]]; then
         # hibernate on encrypted swap is a pain in the ass without lvm
         FSPOINTS="root=/dev/mapper/crypt-system rootflags=subvol=@"
@@ -221,14 +221,14 @@ EOM
     pacstrap /mnt base base-devel dialog dhcpcd netctl iw wpa_supplicant efibootmgr \
         linux linux-firmware lvm2 cryptsetup terminus-font \
         "${EXTRA_PACKAGES[@]}"
-    genfstab -U /mnt >> /mnt/etc/fstab
+    genfstab -U /mnt >>/mnt/etc/fstab
 
     if [ "${DISK_LAYOUT}" == 'btrfs' ]; then
         # We are using a swap file when using btrfs, put that into fstab
-        printf "\n# swapfile\n/swap/file\tnone\tswap\tdefaults\t0\t0\n" >> /mnt/etc/fstab
+        printf "\n# swapfile\n/swap/file\tnone\tswap\tdefaults\t0\t0\n" >>/mnt/etc/fstab
     fi
 
-    arch-chroot /mnt /bin/bash <<- EOF
+    arch-chroot /mnt /bin/bash <<-EOF
 	echo "Setting timezone and time"
 	ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 	echo "Generating and setting locale"
@@ -295,17 +295,26 @@ if [ "$(systemd-detect-virt)" == 'kvm' ]; then # vagrant box, install stuff
     echo "Virtualization detected."
 fi
 
-hash dialog 2>/dev/null || { echo >&2 "dialog required"; exit 1; }
-hash bc 2>/dev/null || { echo >&2 "bc required"; exit 1; }
+hash dialog 2>/dev/null || {
+    echo >&2 "dialog required"
+    exit 1
+}
+hash bc 2>/dev/null || {
+    echo >&2 "bc required"
+    exit 1
+}
 
 setup
 preinstall
 
-if [[ "${DISK_LAYOUT}" == "lvmext4" ]] || \
+if [[ "${DISK_LAYOUT}" == "lvmext4" ]] ||
     [[ "${DISK_LAYOUT}" == "lvmxfs" ]]; then
     partition_lvm
 elif [[ "${DISK_LAYOUT}" == "btrfs" ]]; then
-    hash mkfs.btrfs 2>/dev/null || { echo >&2 "btrfs-progs required"; exit 1; }
+    hash mkfs.btrfs 2>/dev/null || {
+        echo >&2 "btrfs-progs required"
+        exit 1
+    }
     partition_btrfs
 fi
 
