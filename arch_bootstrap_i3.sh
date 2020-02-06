@@ -25,7 +25,7 @@ pacman -S --needed --noconfirm i3-gaps i3status \
     adwaita-icon-theme polkit-gnome brightnessctl feh compton kitty
 
 # aur
-common_install_aur tomb i3lock-fancy-git
+common_install_aur tomb i3lock-fancy-git polybar
 common_install_aur otf-font-awesome-4
 
 common_remove_yay_user
