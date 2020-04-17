@@ -163,6 +163,8 @@ partition_btrfs() {
         /dev/mapper/crypt-system /mnt/var/lib/docker
     mount -o subvol=@libvirt,compress=none,nodatacow \
         /dev/mapper/crypt-system /mnt/var/lib/libvirt
+    # set NOCOW on that directory
+    chattr +C /mnt/var/lib/libvirt
 
     # create extra subvolumes so we don't clobber our / snapshots
     btrfs subvolume create /mnt/var/cache
