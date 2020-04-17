@@ -22,13 +22,15 @@ common_graphical
 pacman -S --needed --noconfirm i3-gaps i3status \
     arandr pavucontrol pulseaudio xss-lock physlock \
     maim wmctrl gtk3 gtk2 udiskie dunst rofi compton gnome-themes-extra \
-    adwaita-icon-theme polkit-gnome brightnessctl feh compton kitty lightdm
+    adwaita-icon-theme polkit-gnome brightnessctl feh compton kitty lightdm \
+    lightdm-webkit2-greeter light-locker
 
 # aur
-common_install_aur tomb i3lock-fancy-git polybar lightdm-webkit-greeter
+common_install_aur tomb i3lock-fancy-git
 common_install_aur otf-font-awesome-4
 
 common_remove_yay_user
 common_services
 common_networkmanager_iwd
 common_keymap
+common_lightdm
