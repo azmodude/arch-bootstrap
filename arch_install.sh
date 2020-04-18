@@ -145,23 +145,23 @@ partition_btrfs() {
     btrfs subvolume create /mnt/@libvirt
     umount /mnt
 
-    mount -o subvol=@ \
+    mount -o subvol=@,noatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt
     mkdir /mnt/{boot,home,.snapshots,swap}
-    mount -o subvol=@home \
+    mount -o subvol=@home,relatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt/home
     btrfs property set /mnt compression zstd
     btrfs property set /mnt/home compression zstd
 
-    mount -o subvol=@swap \
+    mount -o subvol=@swap,noatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt/swap
-    mount -o subvol=@snapshots \
+    mount -o subvol=@snapshots,noatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt/.snapshots
 
     mkdir -p /mnt/var/lib/{docker,libvirt}
-    mount -o subvol=@docker,compress=none \
+    mount -o subvol=@docker,compress=none,noatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt/var/lib/docker
-    mount -o subvol=@libvirt,compress=none,nodatacow \
+    mount -o subvol=@libvirt,compress=none,nodatacow,noatime,noautodefrag,discard=async \
         /dev/mapper/crypt-system /mnt/var/lib/libvirt
     # set NOCOW on that directory
     chattr +C /mnt/var/lib/libvirt
