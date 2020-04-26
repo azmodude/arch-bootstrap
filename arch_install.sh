@@ -106,7 +106,7 @@ partition_lvm() {
 
     pvcreate /dev/mapper/crypt-system
     vgcreate vg-system /dev/mapper/crypt-system
-    lvcreate -L "${SWAP_SIZE}" vg-system -n swap
+    lvcreate -L "${SWAP_SIZE}"G vg-system -n swap
     lvcreate -l 100%FREE vg-system -n root
 
     [[ ${DISK_LAYOUT} == "lvmext4" ]] &&
