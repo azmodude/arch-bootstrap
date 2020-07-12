@@ -84,8 +84,8 @@ preinstall() {
 
 create_luks() {
     echo -n "${LUKS_PASSPHRASE}" |
-        cryptsetup -v --cipher aes-xts-plain64 --key-size 512 --hash sha512 \
-            luksFormat /dev/"${INSTALL_DISK}""${1}"
+        cryptsetup -v --type luks2 --cipher aes-xts-plain64 \
+        --key-size 512 --hash sha512 luksFormat /dev/"${INSTALL_DISK}""${1}"
     echo -n "${LUKS_PASSPHRASE}" |
         cryptsetup open --type luks /dev/"${INSTALL_DISK}""${1}" crypt-system
 }
