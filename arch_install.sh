@@ -56,14 +56,17 @@ setup() {
 
     bootstrap_dialog --title "WARNING" --msgbox "This script will NUKE ${INSTALL_DISK}.\nPress <Enter> to continue or <Esc> to cancel.\n" 6 60
 
+    clear
+
     [ ! -e "${INSTALL_DISK}" ] && echo "${INSTALL_DISK} does not exist!" && exit 1
 
     grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 ||
         IS_INTEL_CPU=0
     grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 ||
         IS_AMD_CPU=0
-
-    clear
+    [ -d /sys/firmware/efi ] && IS_EFI=true || IS_EFI=false
+    [ "${IS_EFI}" = true ] && "UEFI install."
+    [ "${IS_EFI}" = false ] && "Legacy BIOS install."
 }
 
 preinstall() {
@@ -278,7 +281,6 @@ EOM
 	grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
 	grub-install --target=i386-pc ${INSTALL_DISK}
 	grub-mkconfig -o /boot/grub/grub.cfg
-	set +vx
 EOF
 }
 
