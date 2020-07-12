@@ -142,6 +142,8 @@ partition_btrfs() {
     btrfs subvolume create /mnt/@home
     btrfs subvolume create /mnt/@docker
     btrfs subvolume create /mnt/@libvirt
+    btrfs subvolume create /mnt/@var-log
+    btrfs subvolume create /mnt/@srv
     umount /mnt
 
     mount -o subvol=@,noatime,autodefrag,discard=async \
@@ -156,6 +158,13 @@ partition_btrfs() {
         /dev/mapper/crypt-system /mnt/swap
     mount -o subvol=@snapshots,noatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt/.snapshots
+    mkdir -p /mnt/srv
+    mount -o subvol=@srv,compress=none,noatime,autodefrag \
+        /dev/mapper/crypt-system /mnt/srv
+
+    mkdir -p /mnt/var/log
+    mount -o subvol=@var-log,compress=none,noatime,autodefrag \
+        /dev/mapper/crypt-system /mnt/var/log
 
     mkdir -p /mnt/var/lib/{docker,libvirt}
     mount -o subvol=@docker,compress=none,noatime,autodefrag,discard=async \
@@ -166,6 +175,7 @@ partition_btrfs() {
     chattr +C /mnt/var/lib/libvirt
 
     # create extra subvolumes so we don't clobber our / snapshots
+    btrfs subvolume create /mnt/var/abs
     btrfs subvolume create /mnt/var/cache
     btrfs subvolume create /mnt/var/tmp
 
