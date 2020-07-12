@@ -4,6 +4,9 @@ bootstrap_dialog() {
     dialog_result=$(dialog --clear --stdout --backtitle "Arch bootstrapper" --no-shadow "$@" 2>/dev/null)
     [ -z "${dialog_result}" ] && clear && exit 1
 }
+bootstrap_dialog_non_mandatory() {
+    dialog_result=$(dialog --clear --stdout --backtitle "ZFS bootstrapper" --no-shadow "$@" 2>/dev/null)
+}
 
 setup() {
     if [ -z "${INSTALL_DISK}" ]; then
@@ -54,7 +57,7 @@ setup() {
         fi
     fi
 
-    bootstrap_dialog --title "WARNING" --msgbox "This script will NUKE ${INSTALL_DISK}.\nPress <Enter> to continue or <Esc> to cancel.\n" 6 60
+    bootstrap_dialog_non_mandatory --title "WARNING" --msgbox "This script will NUKE ${INSTALL_DISK}.\nPress <Enter> to continue or <Esc> to cancel.\n" 6 60
 
     clear
 
