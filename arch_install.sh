@@ -97,12 +97,13 @@ partition_lvm() {
         set 1 bios_grub on \
         mkpart ESP fat32 2MiB 551MiB \
         set 2 esp on \
-        mkpart primary 551MiB 100%
+        mkpart boot 551MiB 1551MiB \
+        mkpart primary 1551MiB 100%
 
     # give udev some time to create the new symlinks
     sleep 2
-    create_luks "${INSTALL_DISK}-part3"
-    LUKS_PARTITION_UUID=$(cryptsetup luksUUID "${INSTALL_DISK}-part3")
+    create_luks "${INSTALL_DISK}-part4"
+    LUKS_PARTITION_UUID=$(cryptsetup luksUUID "${INSTALL_DISK}-part4")
 
     pvcreate /dev/mapper/crypt-system
     vgcreate vg-system /dev/mapper/crypt-system
@@ -117,9 +118,11 @@ partition_lvm() {
     swapon /dev/mapper/vg--system-swap
     mount /dev/mapper/vg--system-root /mnt
 
+    mkfs.ext4 -L boot "${INSTALL_DISK}-part3"
+    mkdir /mnt/boot && mount "${INSTALL_DISK}-part3" /mnt/boot
+
     mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
-    mkdir -p /mnt/boot/esp
-    mount "${INSTALL_DISK}-part2" /mnt/boot/esp
+    mkdir -p /mnt/boot/esp && mount "${INSTALL_DISK}-part2" /mnt/boot/esp
 }
 
 partition_btrfs() {
