@@ -305,15 +305,6 @@ if [ "$(systemd-detect-virt)" == 'kvm' ]; then # vagrant box, install stuff
     echo "Virtualization detected."
 fi
 
-hash dialog 2>/dev/null || {
-    echo >&2 "dialog required"
-    exit 1
-}
-hash bc 2>/dev/null || {
-    echo >&2 "bc required"
-    exit 1
-}
-
 setup
 preinstall
 
