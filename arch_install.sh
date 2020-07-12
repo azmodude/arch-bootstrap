@@ -137,12 +137,13 @@ partition_btrfs() {
         set 1 bios_grub on \
         mkpart ESP fat32 2MiB 551MiB \
         set 2 esp on \
-        mkpart primary 551MiB 100%
+        mkpart boot 551MiB 1551MiB \
+        mkpart primary 1551MiB 100%
 
     # give udev some time to create the new symlinks
     sleep 2
-    create_luks "${INSTALL_DISK}-part3"
-    LUKS_PARTITION_UUID=$(cryptsetup luksUUID "${INSTALL_DISK}-part3")
+    create_luks "${INSTALL_DISK}-part4"
+    LUKS_PARTITION_UUID=$(cryptsetup luksUUID "${INSTALL_DISK}-part4")
 
     mkfs.btrfs -L root /dev/mapper/crypt-system
     mount /dev/mapper/crypt-system /mnt
@@ -200,9 +201,11 @@ partition_btrfs() {
     # finally mkswap on the file
     mkswap /mnt/swap/file
 
+    mkfs.ext4 -L boot "${INSTALL_DISK}-part3"
+    mount "${INSTALL_DISK}-part3" /mnt/boot
+
     mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
-    mkdir -p /mnt/boot/esp
-    mount "${INSTALL_DISK}-part2" /mnt/boot/esp
+    mkdir /mnt/boot/esp && mount "${INSTALL_DISK}-part2" /mnt/boot/esp
 }
 
 install() {
@@ -286,7 +289,7 @@ EOM
 	sed -r -i "s/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"\"/" /etc/default/grub
 	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 rw\"/" /etc/default/grub
 	[ "${IS_EFI}" = true ] && grub-install --target=x86_64-efi --efi-directory=/boot/esp --bootloader-id=GRUB --recheck
-	[ "${IS_EFI}" = false ] && grub-install --target=i386-pc ${INSTALL_DISK}
+	[ "${IS_EFI}" = false ] && grub-install --target=i386-pc --recheck ${INSTALL_DISK}
 	grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 }
