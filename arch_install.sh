@@ -69,8 +69,8 @@ setup() {
 }
 
 preinstall() {
-    [ "${VIRT}" ] && pacman -S --needed --noconfirm parted dialog dosfstools \
-        arch-install-scripts
+    [ "${VIRT}" ] && pacman -S --needed --noconfirm parted dialog bc \
+        dosfstools arch-install-scripts
     loadkeys de
     [ ! "${VIRT}" ] && ! ping -c 1 -q 8.8.8.8 >/dev/null && wifi-menu
     timedatectl set-ntp true
