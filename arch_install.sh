@@ -231,7 +231,7 @@ EOM
         EXTRA_PACKAGES+=("btrfs-progs")
     fi
     pacstrap /mnt base base-devel dialog dhcpcd netctl iw wpa_supplicant efibootmgr \
-        linux linux-firmware lvm2 cryptsetup terminus-font \
+        linux linux-firmware lvm2 grub cryptsetup terminus-font \
         "${EXTRA_PACKAGES[@]}"
     genfstab -U /mnt >>/mnt/etc/fstab
 
@@ -253,7 +253,7 @@ EOM
 	echo "Setting console settings"
 	cat > /etc/vconsole.conf << END
 	KEYMAP=de-latin1-nodeadkeys
-	FONT=eurlatgr
+	FONT=ter-v16n
 	END
 	echo "Configuring hostname"
 	echo "${HOSTNAME_FQDN}" > /etc/hostname
