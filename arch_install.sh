@@ -84,24 +84,24 @@ preinstall() {
 create_luks() {
     echo -n "${LUKS_PASSPHRASE}" |
         cryptsetup -v --type luks2 --cipher aes-xts-plain64 \
-        --key-size 512 --hash sha512 luksFormat /dev/"${INSTALL_DISK}""${1}"
+        --key-size 512 --hash sha512 luksFormat "${1}"
     echo -n "${LUKS_PASSPHRASE}" |
-        cryptsetup open --type luks /dev/"${INSTALL_DISK}""${1}" crypt-system
-}
-
-get_luks_partition_uuid() {
-    echo $(blkid | grep "${INSTALL_DISK}""${1}" | sed -r 's/.*UUID="([0-9a-z\-]+)"\s.*/\1/')
+        cryptsetup open --type luks "${1}" crypt-system
 }
 
 partition_lvm() {
-    parted --script --align optimal "/dev/${INSTALL_DISK}" \
+    parted --script --align optimal "${INSTALL_DISK}" \
         mklabel gpt \
-        mkpart ESP fat32 1MiB 551MiB \
-        set 1 esp on \
-        mkpart primary 551MIB 100%
+        mkpart BIOS_GRUB 1MiB 2MIB \
+        set 1 bios_grub on \
+        mkpart ESP fat32 2MiB 551MiB \
+        set 2 esp on \
+        mkpart primary 551MiB 100%
 
-    create_luks "${PARTPREFIX}"2
-    LUKS_PARTITION_UUID=$(get_luks_partition_uuid "${PARTPREFIX}"2)
+    # give udev some time to create the new symlinks
+    sleep 2
+    create_luks "${INSTALL_DISK}-part3"
+    LUKS_PARTITION_UUID=$(cryptsetup luksUUID "${INSTALL_DISK}-part3")
 
     pvcreate /dev/mapper/crypt-system
     vgcreate vg-system /dev/mapper/crypt-system
@@ -116,22 +116,25 @@ partition_lvm() {
     swapon /dev/mapper/vg--system-swap
     mount /dev/mapper/vg--system-root /mnt
 
-    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
-    mkdir /mnt/boot
-    mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
+    mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
+    mkdir -p /mnt/boot
+    mount "${INSTALL_DISK}-part2" /mnt/boot
 }
 
 partition_btrfs() {
-    SWAP_END="$(echo "551+(${SWAP_SIZE}*1024)" | bc)MiB"
-    parted --script --align optimal "/dev/${INSTALL_DISK}" \
+    #SWAP_END="$(echo "551+(${SWAP_SIZE}*1024)" | bc)MiB"
+    parted --script --align optimal "${INSTALL_DISK}" \
         mklabel gpt \
-        mkpart ESP fat32 1MiB 551MiB \
-        set 1 esp on \
-        mkpart primary 551MiB "${SWAP_END}" \
-        mkpart primary "${SWAP_END}" 100%
+        mkpart BIOS_GRUB 1MiB 2MIB \
+        set 1 bios_grub on \
+        mkpart ESP fat32 2MiB 551MiB \
+        set 2 esp on \
+        mkpart primary 551MiB 100%
 
-    create_luks "${PARTPREFIX}"3
-    LUKS_PARTITION_UUID=$(get_luks_partition_uuid "${PARTPREFIX}"3)
+    # give udev some time to create the new symlinks
+    sleep 2
+    create_luks "${INSTALL_DISK}-part3"
+    LUKS_PARTITION_UUID=$(cryptsetup luksUUID "${INSTALL_DISK}-part3")
 
     mkfs.btrfs -L root /dev/mapper/crypt-system
     mount /dev/mapper/crypt-system /mnt
@@ -189,8 +192,8 @@ partition_btrfs() {
     # finally mkswap on the file
     mkswap /mnt/swap/file
 
-    mkfs.fat -F32 -n ESP /dev/"${INSTALL_DISK}""${PARTPREFIX}"1
-    mount /dev/"${INSTALL_DISK}""${PARTPREFIX}"1 /mnt/boot
+    mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
+    mount "${INSTALL_DISK}-part2" /mnt/boot
 }
 
 install() {
