@@ -7,14 +7,20 @@ bootstrap_dialog() {
 }
 
 setup() {
+    if [ -z "${INSTALL_DISK}" ]; then
+        declare -a disks
+        for disk in /dev/disk/by-id/*; do
+            disks+=("${disk}" "$(basename "$(readlink "$disk")")")
+        done
+        bootstrap_dialog --title "Choose installation disk" \
+                        --menu "Which disk to install on?" 0 0 0 \
+                        "${disks[@]}"
+        INSTALL_DISK="${dialog_result}"
+    fi
+
     if [ -z "${HOSTNAME_FQDN}" ]; then
         bootstrap_dialog --title "Hostname" --inputbox "Please enter a fqdn for this host.\n" 8 60
         HOSTNAME_FQDN="$dialog_result"
-    fi
-
-    if [ -z "${INSTALL_DISK}" ]; then
-        bootstrap_dialog --title "Installation Disk" --inputbox "Please enter the device to install on (e.g. sda).\n" 8 60
-        INSTALL_DISK="$dialog_result"
     fi
 
     if [ -z "${DISK_LAYOUT}" ]; then
@@ -51,21 +57,14 @@ setup() {
 
     bootstrap_dialog --title "WARNING" --msgbox "This script will NUKE ${INSTALL_DISK}.\nPress <Enter> to continue or <Esc> to cancel.\n" 6 60
 
-    if [ -z "${INSTALL_DISK}" ] || [ ! -e "/dev/${INSTALL_DISK}" ]; then
-        echo "/dev/${INSTALL_DISK} does not exist!"
-        exit 1
-    fi
+    [ ! -e "${INSTALL_DISK}" ] && echo "${INSTALL_DISK} does not exist!" && exit 1
 
-    if grep -q /dev/"${INSTALL_DISK}" /proc/mounts; then
-        echo "INSTALL_DISK /dev/${INSTALL_DISK} is in use!"
-        exit 1
-    fi
-
-    if [[ "${INSTALL_DISK}" =~ ^nvme ]]; then PARTPREFIX="p"; else PARTPREFIX=""; fi
     grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 ||
         IS_INTEL_CPU=0
     grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 ||
         IS_AMD_CPU=0
+
+    clear
 }
 
 preinstall() {
