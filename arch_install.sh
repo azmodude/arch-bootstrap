@@ -139,7 +139,6 @@ partition_btrfs() {
     # convention: subvolumes used as mountpoints start with @
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@swap
-    btrfs subvolume create /mnt/@snapshots
     btrfs subvolume create /mnt/@home
     btrfs subvolume create /mnt/@docker
     btrfs subvolume create /mnt/@libvirt
@@ -147,8 +146,8 @@ partition_btrfs() {
 
     mount -o subvol=@,noatime,autodefrag,discard=async \
         /dev/mapper/crypt-system /mnt
-    mkdir /mnt/{boot,home,.snapshots,swap}
     mount -o subvol=@home,relatime,autodefrag,discard=async \
+    mkdir /mnt/{boot,home,swap}
         /dev/mapper/crypt-system /mnt/home
     btrfs property set /mnt compression zstd
     btrfs property set /mnt/home compression zstd
