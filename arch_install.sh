@@ -274,20 +274,12 @@ EOM
 	echo "root:${ROOT_PASSWORD}" | chpasswd
 	echo "vfat" > /etc/modules-load.d/vfat.conf
 	echo "Installing bootloader"
-	bootctl --path=/boot install
-	bootctl random-seed
-	cat > /boot/loader/loader.conf << END
-	default archlinux
-	timeout 3
-	editor no
-	console-mode max
-	END
-	cat > /boot/loader/entries/archlinux.conf << END
-	title Arch Linux
-	linux /vmlinuz-linux
-	${INITRD}
-	options rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS} consoleblank=120 rw
-	END
+	sed -r -i "s/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"\"/" /etc/default/grub
+	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 rw\"/" /etc/default/grub
+	grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
+	grub-install --target=i386-pc ${INSTALL_DISK}
+	grub-mkconfig -o /boot/grub/grub.cfg
+	set +vx
 EOF
 }
 
