@@ -68,8 +68,8 @@ setup() {
 }
 
 preinstall() {
-    [ "${VIRT}" ] && pacman -S --needed --noconfirm parted dialog bc \
-        dosfstools arch-install-scripts
+    pacman -S --needed --noconfirm parted dialog bc dosfstools \
+        arch-install-scripts btrfs-progs xfsprogs lvm2
     loadkeys de
     [ ! "${VIRT}" ] && ! ping -c 1 -q 8.8.8.8 >/dev/null && wifi-menu
     timedatectl set-ntp true
@@ -304,8 +304,8 @@ if [ "$(systemd-detect-virt)" == 'kvm' ]; then # vagrant box, install stuff
     echo "Virtualization detected."
 fi
 
-setup
 preinstall
+setup
 
 if [[ "${DISK_LAYOUT}" == "lvmext4" ]] ||
     [[ "${DISK_LAYOUT}" == "lvmxfs" ]]; then
