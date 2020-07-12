@@ -123,7 +123,7 @@ partition_lvm() {
     mount /dev/mapper/vg--system-root /mnt
 
     mkfs.ext4 -L boot "${INSTALL_DISK}-part3"
-    mkdir /mnt/boot && mount "${INSTALL_DISK}-part3" /mnt/boot
+    mount "${INSTALL_DISK}-part3" /mnt/boot
 
     mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
     mkdir -p /mnt/boot/esp && mount "${INSTALL_DISK}-part2" /mnt/boot/esp
