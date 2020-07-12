@@ -1,8 +1,10 @@
+destroy:
+	vagrant destroy -f
 up:
 	vagrant up
-provision:
-	vagrant provision
-shell:
-	vagrant ssh
-clean:
-	vagrant destroy --force
+reload:
+	vagrant reload
+ssh:
+	TERM=xterm-256color vagrant ssh
+clean: destroy up reload
+cleanterm: clean ssh
