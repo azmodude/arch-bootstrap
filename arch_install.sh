@@ -284,7 +284,6 @@ EOF
 }
 
 function tear_down() {
-    echo "not implemented"
     umount -R /mnt
     cryptsetup close crypt-system
 }
