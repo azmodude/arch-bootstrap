@@ -29,7 +29,9 @@ Vagrant.configure("2") do |config|
       lv.graphics_type ='spice'
       lv.keymap = 'de'
       lv.channel :type => 'spicevmc', :target_name => 'com.redhat.spice.0', :target_type => 'virtio'
-      lv.storage :file, :size => '40G', :type => 'qcow2', :bus => 'virtio', :device => 'vdb'
+      # we need SCSI as bus here since udev (usually) does not create by-id
+      # links when virtio devices are used
+      lv.storage :file, :size => '40G', :type => 'qcow2', :bus => 'scsi', :device => 'sdz'
     end
 
     arch.vm.box_check_update = true
