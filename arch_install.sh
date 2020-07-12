@@ -2,6 +2,7 @@
 
 bootstrap_dialog() {
     dialog_result=$(dialog --clear --stdout --backtitle "Arch bootstrapper" --no-shadow "$@" 2>/dev/null)
+    [ -z "${dialog_result}" ] && clear && exit 1
 }
 
 setup() {
