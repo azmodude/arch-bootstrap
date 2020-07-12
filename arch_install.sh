@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 bootstrap_dialog() {
     dialog_result=$(dialog --clear --stdout --backtitle "Arch bootstrapper" --no-shadow "$@" 2>/dev/null)
@@ -65,8 +64,8 @@ setup() {
     grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 ||
         IS_AMD_CPU=0
     [ -d /sys/firmware/efi ] && IS_EFI=true || IS_EFI=false
-    [ "${IS_EFI}" = true ] && "UEFI install."
-    [ "${IS_EFI}" = false ] && "Legacy BIOS install."
+    [ "${IS_EFI}" = true ] && echo "Performing UEFI install."
+    [ "${IS_EFI}" = false ] && echo "Perorming legacy BIOS install."
 }
 
 preinstall() {
@@ -119,8 +118,8 @@ partition_lvm() {
     mount /dev/mapper/vg--system-root /mnt
 
     mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
-    mkdir -p /mnt/boot/efi
-    mount "${INSTALL_DISK}-part2" /mnt/boot/efi
+    mkdir -p /mnt/boot/esp
+    mount "${INSTALL_DISK}-part2" /mnt/boot/esp
 }
 
 partition_btrfs() {
@@ -195,7 +194,8 @@ partition_btrfs() {
     mkswap /mnt/swap/file
 
     mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
-    mount "${INSTALL_DISK}-part2" /mnt/boot
+    mkdir -p /mnt/boot/esp
+    mount "${INSTALL_DISK}-part2" /mnt/boot/esp
 }
 
 install() {
@@ -278,13 +278,14 @@ EOM
 	echo "Installing bootloader"
 	sed -r -i "s/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"\"/" /etc/default/grub
 	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 rw\"/" /etc/default/grub
-	[ "${IS_EFI}" = true ] && grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
+	[ "${IS_EFI}" = true ] && grub-install --target=x86_64-efi --efi-directory=/boot/esp --bootloader-id=GRUB --recheck
 	[ "${IS_EFI}" = false ] && grub-install --target=i386-pc ${INSTALL_DISK}
 	grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 }
 
 function tear_down() {
+    swapoff -a
     umount -R /mnt
     cryptsetup close crypt-system
 }
