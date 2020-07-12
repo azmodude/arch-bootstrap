@@ -11,14 +11,16 @@ Vagrant.configure("2") do |config|
     arch.vm.synced_folder '.', '/vagrant', type: 'sshfs'
     # as we are using a GUI, modify VM to accomodate for that
     arch.vm.provider :virtualbox do |vb|
-      disk_file = 'arch_install.vdi'
+      disk_file = 'tmp/arch_install.vdi'
       vb.name = "arch"
       vb.gui = true
       vb.customize ["modifyvm", :id, "--vram", "64"]
       vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
       vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
-      vb.customize ['createhd', '--filename', disk_file, '--size', 20 * 1024]
-      vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk_file]
+      unless File.exist?(disk_file)
+        vb.customize ['createhd', '--filename', disk_file, '--size', 20 * 1024]
+      end
+      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk_file]
     end
     arch.vm.provider :libvirt do |lv|
       # lv.loader = '/usr/share/qemu/OVMF.fd'
@@ -28,18 +30,17 @@ Vagrant.configure("2") do |config|
       lv.keymap = 'de'
       lv.channel :type => 'spicevmc', :target_name => 'com.redhat.spice.0', :target_type => 'virtio'
       lv.storage :file, :size => '40G', :type => 'qcow2', :bus => 'virtio', :device => 'vdb'
-
     end
 
     arch.vm.box_check_update = true
-    arch.vm.provision "shell", inline: <<-SHELL
+    $provisioning_script_archkeys = <<-'SCRIPT'
         pacman -Sy
         rm -rf /etc/pacman.d/gnupg
         # Work around Arch's keymgmt being anal sometimes
         pacman-key --init && pacman-key --populate archlinux && \
             pacman -Syw --noconfirm archlinux-keyring && \
             pacman --noconfirm -S archlinux-keyring
-		pacman -S --noconfirm dialog bc lvm2 cryptsetup btrfs-progs xfsprogs
-    SHELL
+SCRIPT
+    arch.vm.provision "shell", inline: $provisioning_script_archkeys
   end
 end
