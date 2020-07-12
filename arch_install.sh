@@ -119,8 +119,8 @@ partition_lvm() {
     mount /dev/mapper/vg--system-root /mnt
 
     mkfs.fat -F32 -n ESP "${INSTALL_DISK}-part2"
-    mkdir -p /mnt/boot
-    mount "${INSTALL_DISK}-part2" /mnt/boot
+    mkdir -p /mnt/boot/efi
+    mount "${INSTALL_DISK}-part2" /mnt/boot/efi
 }
 
 partition_btrfs() {
@@ -278,8 +278,8 @@ EOM
 	echo "Installing bootloader"
 	sed -r -i "s/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"\"/" /etc/default/grub
 	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 rw\"/" /etc/default/grub
-	grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
-	grub-install --target=i386-pc ${INSTALL_DISK}
+	[ "${IS_EFI}" = true ] && grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
+	[ "${IS_EFI}" = false ] && grub-install --target=i386-pc ${INSTALL_DISK}
 	grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 }
