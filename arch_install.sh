@@ -1,5 +1,4 @@
 #!/bin/bash
-# UEFI only
 set -e
 
 bootstrap_dialog() {
