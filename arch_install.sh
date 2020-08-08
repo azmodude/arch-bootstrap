@@ -243,7 +243,7 @@ EOM
         EXTRA_PACKAGES+=("btrfs-progs")
     fi
     pacstrap /mnt base base-devel dialog dhcpcd netctl iw wpa_supplicant efibootmgr \
-        linux linux-firmware lvm2 grub cryptsetup terminus-font \
+        linux linux-firmware lvm2 grub cryptsetup terminus-font apparmor \
         "${EXTRA_PACKAGES[@]}"
     genfstab -U /mnt >>/mnt/etc/fstab
 
@@ -273,6 +273,7 @@ EOM
 	127.0.0.1   localhost.localdomain localhost
 	127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
 	END
+	systemctl enable apparmor.service
 	echo "Generating mkinitcpio.conf"
 	cat > /etc/mkinitcpio.conf << END
 	MODULES=(${MODULES})
@@ -287,7 +288,7 @@ EOM
 	echo "vfat" > /etc/modules-load.d/vfat.conf
 	echo "Installing bootloader"
 	sed -r -i "s/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"\"/" /etc/default/grub
-	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 rw\"/" /etc/default/grub
+	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 apparmor=1 lsm=lockdown,yama,apparmor rw\"/" /etc/default/grub
 	[ "${IS_EFI}" = true ] && grub-install --target=x86_64-efi --efi-directory=/boot/esp --bootloader-id=GRUB --recheck
 	[ "${IS_EFI}" = false ] && grub-install --target=i386-pc --recheck ${INSTALL_DISK}
 	grub-mkconfig -o /boot/grub/grub.cfg
