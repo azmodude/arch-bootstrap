@@ -35,6 +35,7 @@ Vagrant.configure("2") do |config|
     end
 
     arch.vm.box_check_update = true
+
     $provisioning_script_archkeys = <<-'SCRIPT'
         pacman -Sy
         rm -rf /etc/pacman.d/gnupg
@@ -42,7 +43,17 @@ Vagrant.configure("2") do |config|
         pacman-key --init && pacman-key --populate archlinux && \
             pacman -Syw --noconfirm archlinux-keyring && \
             pacman --noconfirm -S archlinux-keyring
+
+        # copy pacman related files over
+        cp /vagrant/etc/pacman.d/* /etc/pacman.d
+        cp /vagrant/etc/pacman.conf /etc/pacman.conf
+        # get and lsign archzfs keys
+        pacman-key --keyserver pool.sks-keyservers.net -r DDF7DB817396A49B2A2723F7403BD972F75D9D76
+        pacman-key --lsign-key DDF7DB817396A49B2A2723F7403BD972F75D9D76
+        pacman -Syyu --noconfirm
+        pacman -S --noconfirm zfs-linux zfs-utils
 SCRIPT
     arch.vm.provision "shell", inline: $provisioning_script_archkeys
+
   end
 end

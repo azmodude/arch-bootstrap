@@ -7,4 +7,4 @@ reload:
 ssh:
 	TERM=xterm-256color vagrant ssh
 clean: destroy up reload
-cleanterm: clean ssh
+cleanssh: clean ssh
