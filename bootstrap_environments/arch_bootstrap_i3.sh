@@ -7,7 +7,7 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 curdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-source "${curdir}/bootstrap_common.sh"
+source "${curdir}/arch_bootstrap_common.sh"
 
 common_set_time
 common_reflector
