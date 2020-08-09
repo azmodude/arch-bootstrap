@@ -114,18 +114,6 @@ partition_lvm_zfs() {
     echo -n "${LUKS_PASSPHRASE}" | cryptsetup open --type luks "${INSTALL_DISK}-part4" crypt-system
     LUKS_PARTITION_UUID_OS=$(cryptsetup luksUUID "${INSTALL_DISK}-part4")
 
-    # create a keyfile and add it to LUKS partition for ZFS so it unlocks
-    # without entering our password twice
-    mkdir -p "${mydir}/tmp"
-    dd bs=512 count=4 if=/dev/random of="${mydir}/tmp/zfs_keyfile" iflag=fullblock
-    chmod 600 "${mydir}/tmp/zfs_keyfile"
-    echo -n "${LUKS_PASSPHRASE}" |
-        cryptsetup -v --type luks2 --cipher aes-xts-plain64 \
-        --key-size 512 --hash sha512 luksFormat "${INSTALL_DISK}-part5"
-    echo -n "${LUKS_PASSPHRASE}" | cryptsetup open --type luks "${INSTALL_DISK}-part5" crypt-data
-    echo -n "${LUKS_PASSPHRASE}" | cryptsetup luksAddKey "${INSTALL_DISK}-part5" "${mydir}/tmp/zfs_keyfile"
-    LUKS_PARTITION_UUID_DATA=$(cryptsetup luksUUID "${INSTALL_DISK}-part5")
-
     # setup lvm for the OS
     pvcreate /dev/mapper/crypt-system
     vgcreate vg-system /dev/mapper/crypt-system
@@ -138,14 +126,21 @@ partition_lvm_zfs() {
     swapon /dev/mapper/vg--system-swap
     mount /dev/mapper/vg--system-root /mnt
 
+    # create a keyfile and add it to LUKS partition for ZFS so it unlocks
+    # without entering our password twice
+    dd bs=1 if=/dev/random of="/etc/zfs_keyfile" count=32
+    chmod 600 "/etc/zfs_keyfile"
+
     # setup ZFS
     zpool create \
     -o ashift=12 \
     -o autotrim=on \
+    -O encryption=aes-256-gcm \
+    -O keylocation=file:///etc/zfs_keyfile -O keyformat=raw \
     -O acltype=posixacl -O canmount=off -O compression=lz4 \
     -O dnodesize=auto -O normalization=formD -O relatime=on \
     -O xattr=sa -O mountpoint=none dpool \
-    -R /mnt /dev/mapper/crypt-data
+    -R /mnt "${INSTALL_DISK}"-part5
     zfs create -o mountpoint=/home dpool/home
     zfs create -o mountpoint=/var/lib/docker dpool/docker
 
@@ -197,70 +192,21 @@ EOM
     tac /tmp/fstab.tmp > /mnt/etc/fstab
 
     cp -r "${mydir}"/etc/** /mnt/etc
-    cp "${mydir}/tmp/zfs_keyfile" /mnt/etc/zfs_keyfile
+    cp "/etc/zfs_keyfile" /mnt/etc/zfs_keyfile
     chmod 600 /mnt/etc/zfs_keyfile
 
-    arch-chroot /mnt /bin/bash <<-EOF
-	echo "Setting timezone and time"
-	ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-	echo "Generating and setting locale"
-	cat > /etc/locale.gen << END
-	en_US.UTF-8 UTF-8
-	de_DE.UTF-8 UTF-8
-	END
-	locale-gen
-	echo "LANG=en_US.UTF-8" > /etc/locale.conf
-	echo "Setting console settings"
-	cat > /etc/vconsole.conf << END
-	KEYMAP=de-latin1-nodeadkeys
-	FONT=ter-v16n
-	END
-	echo "Configuring hostname"
-	echo "${HOSTNAME_FQDN}" > /etc/hostname
-	cat > /etc/hosts << END
-	127.0.0.1   localhost.localdomain localhost
-	127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
-	END
-
-	sed -r -i 's/^#(write-cache)$/\1/' /etc/apparmor/parser.conf
-	systemctl enable apparmor.service
-
-	cat > /etc/crypttab << END
-	crypt-data  UUID=${LUKS_PARTITION_UUID_DATA}   /etc/zfs_keyfile
-	END
-
-	zpool set cachefile=/etc/zfs/zpool.cache dpool
-	systemctl enable zfs-import-cache
-	systemctl enable zfs-import.target
-	mkdir -p /etc/zfs/zfs-list.cache
-	ln -s /usr/lib/zfs/zed.d/history_event-zfs-list-cacher.sh /etc/zfs/zed.d
-	systemctl enable zfs-zed.service
-	systemctl enable zfs.target
-	systemctl start zfs-zed.service
-	touch /etc/zfs/zfs-list.cache/dpool
-	zfs set canmount=off dpool
-	zfs set canmount=on dpool
-	zfs set canmount=off dpool
-
-	echo "Generating mkinitcpio.conf"
-	cat > /etc/mkinitcpio.conf << END
-	MODULES=(${MODULES})
-	BINARIES=()
-	FILES=()
-	HOOKS="base systemd autodetect modconf sd-vconsole keyboard block sd-encrypt sd-lvm2 filesystems fsck"
-	COMPRESSION=gzip
-	END
-	mkinitcpio -p linux
-	echo "Setting root passwd"
-	echo "root:${ROOT_PASSWORD}" | chpasswd
-	echo "vfat" > /etc/modules-load.d/vfat.conf
-	echo "Installing bootloader"
-	sed -r -i "s/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"\"/" /etc/default/grub
-	sed -r -i "s/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_PARTITION_UUID_OS}=crypt-system rd.luks.options=discard ${FSPOINTS//\//\\/} consoleblank=120 apparmor=1 lsm=lockdown,yama,apparmor rw\"/" /etc/default/grub
-	[ "${IS_EFI}" = true ] && grub-install --target=x86_64-efi --efi-directory=/boot/esp --bootloader-id=GRUB --recheck
-	[ "${IS_EFI}" = false ] && grub-install --target=i386-pc --recheck ${INSTALL_DISK}
-	grub-mkconfig -o /boot/grub/grub.cfg
-EOF
+    cp "${mydir}/arch_install_zfs_chroot.sh" /mnt
+    arch-chroot /mnt /usr/bin/env \
+        MODULES="${MODULES}" \
+        HOSTNAME="${HOSTNAME}" \
+        HOSTNAME_FQDN="${HOSTNAME_FQDN}" \
+        ROOT_PASSWORD="${ROOT_PASSWORD}" \
+        LUKS_PARTITION_UUID_OS="${LUKS_PARTITION_UUID_OS}" \
+        INSTALL_DISK="${INSTALL_DISK}" \
+        IS_EFI="${IS_EFI}" \
+        FSPOINTS="${FSPOINTS}" \
+        /bin/bash --login -c /arch_install_zfs_chroot.sh
+    rm /mnt/arch_install_zfs_chroot.sh
 }
 
 function tear_down() {
@@ -290,4 +236,4 @@ preinstall
 setup
 partition_lvm_zfs
 install
-tear_down
+#tear_down
