@@ -30,7 +30,8 @@ Vagrant.configure("2") do |config|
       lv.keymap = 'de'
       lv.channel :type => 'spicevmc', :target_name => 'com.redhat.spice.0', :target_type => 'virtio'
       # we need SCSI as bus here since udev (usually) does not create by-id
-      # links when virtio devices are used
+      # links when virtio devices are used; particularly bad when used with
+      # zfs as we use /dev/disk/by-id/xxxyyyzzz here.
       lv.storage :file, :size => '40G', :type => 'qcow2', :bus => 'scsi', :device => 'sdz'
     end
 
