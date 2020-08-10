@@ -19,8 +19,12 @@ common_install_yay
 common_graphical
 
 # install plasma
-pacman -S --needed --noconfirm plasma-meta konsole dolphin \
+pacman -S --needed --noconfirm plasma-meta konsole alacritty dolphin \
     kdegraphics-thumbnailers ffmpegthumbs gtk2
+# aur
+common_install_aur tomb i3lock-fancy-git
+common_install_aur otf-font-awesome-4
+
 systemctl enable sddm.service
 # fix pinentry symbolic link
 rm /usr/bin/pinentry && ln -s /usr/bin/pinentry-qt /usr/bin/pinentry
