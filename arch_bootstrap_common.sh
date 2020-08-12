@@ -92,7 +92,9 @@ common_add_yay_user() {
     echo "yay ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/yay
     mkdir /home/yay/.gnupg &&
         echo "keyserver-options auto-key-retrieve" > \
-            /home/yay/.gnupg/gpg.conf &&
+            /home/yay/.gnupg/gpg.conf && \
+	echo "keyserver pool.sks-keyservers.net" >> \
+	    /home/yay/.gnupg/gpg.conf && \
         chown -R yay /home/yay/.gnupg
 }
 common_install_yay() {
