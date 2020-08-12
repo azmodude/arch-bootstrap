@@ -22,7 +22,7 @@ common_graphical
 pacman -S --needed --noconfirm plasma-meta konsole alacritty dolphin \
     kdegraphics-thumbnailers ffmpegthumbs gtk2
 # aur
-common_install_aur tomb i3lock-fancy-git
+common_install_aur tomb
 common_install_aur otf-font-awesome-4
 
 systemctl enable sddm.service
