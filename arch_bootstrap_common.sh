@@ -104,7 +104,8 @@ common_add_yay_user() {
             /home/yay/.gnupg/gpg.conf && \
 	echo "keyserver pool.sks-keyservers.net" >> \
 	    /home/yay/.gnupg/gpg.conf && \
-        chown -R yay /home/yay/.gnupg
+        chown -R "yay:users" /home/yay/.gnupg && \
+            chmod 700 /home/yay/.gnupg
 }
 common_install_yay() {
     tmpdir=$(mktemp -d) && chown -R yay "${tmpdir}"
