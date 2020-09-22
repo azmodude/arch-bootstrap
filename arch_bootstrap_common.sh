@@ -68,6 +68,10 @@ common_graphical() {
 }
 
 common_user() {
+    # create new dataset for user
+    if ! zfs list "dpool/home/${user}" 2>/dev/null; then
+        zfs create "dpool/home/${user}"
+    fi
     # Create and setup new user
     if ! getent passwd ${user} >/dev/null; then
         echo
@@ -79,6 +83,11 @@ common_user() {
             -s "/usr/bin/${shell}" "${user}"
         chfn --full-name "${user_fullname}" "${user}"
         passwd "${user}"
+	# as the home directory already exists as zfs dataset
+	# copy files from skel over manually and adjust permissions
+	cp -r /etc/skel/. "/home/${user}"
+	chown -R "${user}:${primarygroup}" "/home/${user}" && \
+	    chmod 700 "/home/${user}"
     fi
     if ! [ -f "/etc/sudoers.d/${user}" ]; then
         cat >"/etc/sudoers.d/${user}" <<-EOF
