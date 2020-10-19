@@ -2,7 +2,7 @@
 
 # User variables
 user=azmo
-uuid=1337
+uuid=1000
 user_fullname="Gordon Schulz"
 primarygroup=azmo
 primarygid=1000
@@ -83,11 +83,11 @@ common_user() {
             -s "/usr/bin/${shell}" "${user}"
         chfn --full-name "${user_fullname}" "${user}"
         passwd "${user}"
-	# as the home directory already exists as zfs dataset
-	# copy files from skel over manually and adjust permissions
-	cp -r /etc/skel/. "/home/${user}"
-	chown -R "${user}:${primarygroup}" "/home/${user}" && \
-	    chmod 700 "/home/${user}"
+        # as the home directory already exists as zfs dataset
+        # copy files from skel over manually and adjust permissions
+        cp -r /etc/skel/. "/home/${user}"
+        chown -R "${user}:${primarygroup}" "/home/${user}" &&
+            chmod 700 "/home/${user}"
     fi
     if ! [ -f "/etc/sudoers.d/${user}" ]; then
         cat >"/etc/sudoers.d/${user}" <<-EOF
@@ -101,11 +101,11 @@ common_add_yay_user() {
     echo "yay ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/yay
     mkdir /home/yay/.gnupg &&
         echo "keyserver-options auto-key-retrieve" > \
-            /home/yay/.gnupg/gpg.conf && \
-	echo "keyserver pool.sks-keyservers.net" >> \
-	    /home/yay/.gnupg/gpg.conf && \
-        chown -R "yay:users" /home/yay/.gnupg && \
-            chmod 700 /home/yay/.gnupg
+            /home/yay/.gnupg/gpg.conf &&
+        echo "keyserver keyserver.ubuntu.com" >> \
+            /home/yay/.gnupg/gpg.conf &&
+        chown -R "yay:users" /home/yay/.gnupg &&
+        chmod 700 /home/yay/.gnupg
 }
 common_install_yay() {
     tmpdir=$(mktemp -d) && chown -R yay "${tmpdir}"
