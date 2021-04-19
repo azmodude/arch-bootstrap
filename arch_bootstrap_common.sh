@@ -2,10 +2,10 @@
 
 # User variables
 user=azmo
-uuid=1000
 user_fullname="Gordon Schulz"
+uuid=1337
 primarygroup=azmo
-primarygid=1000
+primarygid=1337
 # comma separate groups
 additional_groups=wheel,users
 usersgid=100
@@ -33,7 +33,7 @@ common_reflector() {
 
 common_custom_repo() {
     # Get custom Repository key and lsign it
-    pacman-key --keyserver hkp://eu.pool.sks-keyservers.net \
+    pacman-key --keyserver hkps://eu.pool.sks-keyservers.net \
         --recv-keys ${gpgkeyid}
     pacman-key --lsign-key ${gpgkeyid}
     # Enable custom Repository in pacman.conf
@@ -49,9 +49,8 @@ common_custom_repo() {
 common_essential() {
     # Essential stuff (terminal)
     pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
-        netctl networkmanager iwd zsh keychain lsb-release git git-crypt \
-        gopass pass oath-toolkit xclip xsel neovim python-neovim \
-        wipe tmux expect
+        pass gopass iwd systemd-resolvconf zsh lsb-release git git-crypt \
+        xclip xsel neovim python-neovim wipe tmux expect
 }
 
 common_graphical() {
@@ -96,37 +95,37 @@ common_user() {
     fi
 }
 
-common_add_yay_user() {
-    useradd -m -p yay yay
-    echo "yay ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/yay
-    mkdir /home/yay/.gnupg &&
+common_add_paru_user() {
+    useradd -m -p paru paru
+    echo "paru ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/paru
+    mkdir /home/paru/.gnupg &&
         echo "keyserver-options auto-key-retrieve" > \
-            /home/yay/.gnupg/gpg.conf &&
-        echo "keyserver keyserver.ubuntu.com" >> \
-            /home/yay/.gnupg/gpg.conf &&
-        chown -R "yay:users" /home/yay/.gnupg &&
-        chmod 700 /home/yay/.gnupg
+            /home/paru/.gnupg/gpg.conf &&
+        echo "keyserver hkps://keyserver.ubuntu.com" >> \
+            /home/paru/.gnupg/gpg.conf &&
+        chown -R "paru:users" /home/paru/.gnupg &&
+        chmod 700 /home/paru/.gnupg
 }
-common_install_yay() {
-    tmpdir=$(mktemp -d) && chown -R yay "${tmpdir}"
-    su -l -c "git clone https://aur.archlinux.org/yay-bin.git ${tmpdir}" yay
-    su -l -c "cd ${tmpdir} && makepkg -srci --noconfirm --needed" yay
+common_install_paru() {
+    tmpdir=$(mktemp -d) && chown -R paru "${tmpdir}"
+    su -l -c "git clone https://aur.archlinux.org/paru-bin.git ${tmpdir}" paru
+    su -l -c "cd ${tmpdir} && makepkg -srci --noconfirm --needed" paru
 }
-common_remove_yay_user() {
-    userdel -rf yay
-    rm -f /etc/sudoers.d/yay
+common_remove_paru_user() {
+    userdel -rf paru
+    rm -f /etc/sudoers.d/paru
 }
 
 common_install_aur() {
-    sudo -u yay -i -H yay -Sy --cleanafter --removemake --pgpfetch \
+    sudo -u paru -i -H paru -Sy --cleanafter --removemake --pgpfetch \
         --noconfirm --needed "${@}"
 }
 
 common_services() {
-    # Disable netctl and enable essential services
-    systemctl disable netctl &&
-        systemctl enable gpm sshd systemd-resolved systemd-networkd \
-            NetworkManager NetworkManager-dispatcher iwd
+    # enable mandatory services
+    systemctl enable --now gpm sshd systemd-resolved systemd-networkd iwd
+    # create link to systemd-resolved stub
+    ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 }
 
 common_keymap() {
