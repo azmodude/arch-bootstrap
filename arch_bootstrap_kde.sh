@@ -27,7 +27,6 @@ pacman -S --needed --noconfirm plasma-meta konsole dolphin \
     kdegraphics-thumbnailers ffmpegthumbs gtk2
 # aur
 common_install_aur tomb
-common_install_aur otf-font-awesome-4
 
 systemctl enable sddm.service
 
