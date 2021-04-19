@@ -23,7 +23,7 @@ common_install_paru
 common_graphical
 
 # install plasma
-pacman -S --needed --noconfirm plasma-meta konsole alacritty dolphin \
+pacman -S --needed --noconfirm plasma-meta konsole dolphin \
     kdegraphics-thumbnailers ffmpegthumbs gtk2
 # aur
 common_install_aur tomb
