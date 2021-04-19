@@ -3,9 +3,9 @@
 # User variables
 user=azmo
 user_fullname="Gordon Schulz"
-uuid=1337
+uuid=1000
 primarygroup=azmo
-primarygid=1337
+primarygid=1000
 # comma separate groups
 additional_groups=wheel,users
 usersgid=100
