@@ -49,7 +49,7 @@ common_custom_repo() {
 common_essential() {
     # Essential stuff (terminal)
     pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
-        pass gopass iwd systemd-resolvconf zsh lsb-release git git-crypt \
+        pass iwd systemd-resolvconf zsh lsb-release git git-crypt \
         xclip xsel neovim python-neovim wipe tmux expect
 }
 
@@ -66,7 +66,7 @@ common_graphical() {
         xterm "${graphic_packages[@]}"
 }
 
-common_user() {
+common_user_zfs() {
     # create new dataset for user
     if ! zfs list "dpool/home/${user}" 2>/dev/null; then
         zfs create "dpool/home/${user}"
@@ -87,6 +87,25 @@ common_user() {
         cp -r /etc/skel/. "/home/${user}"
         chown -R "${user}:${primarygroup}" "/home/${user}" &&
             chmod 700 "/home/${user}"
+    fi
+    if ! [ -f "/etc/sudoers.d/${user}" ]; then
+        cat >"/etc/sudoers.d/${user}" <<-EOF
+			${user} ALL=(ALL) ALL
+		EOF
+    fi
+}
+common_user() {
+    # Create and setup new user
+    if ! getent passwd ${user} >/dev/null; then
+        echo
+        echo "Adding ${user}"
+        groupadd -g "${primarygid}" "${primarygroup}"
+        groupadd -g "${usersgid}" users || groupmod -g "${usersgid}" users
+
+        useradd -u "${uuid}" -m -g "${primarygroup}" -G "${additional_groups}" \
+            -s "/usr/bin/${shell}" "${user}"
+        chfn --full-name "${user_fullname}" "${user}"
+        passwd "${user}"
     fi
     if ! [ -f "/etc/sudoers.d/${user}" ]; then
         cat >"/etc/sudoers.d/${user}" <<-EOF
