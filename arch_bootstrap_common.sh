@@ -50,7 +50,7 @@ common_essential() {
     # Essential stuff (terminal)
     pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
         pass iwd systemd-resolvconf zsh lsb-release git git-crypt \
-        xclip xsel neovim python-neovim wipe tmux expect
+        xclip xsel neovim python-neovim wipe tmux expect NetworkManager
 }
 
 common_graphical() {
