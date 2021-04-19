@@ -14,8 +14,8 @@ common_reflector
 common_essential
 common_user
 common_makepkg_conf
-common_add_yay_user
-common_install_yay
+common_add_paru_user
+common_install_paru
 common_graphical
 
 # install plasma
@@ -26,10 +26,8 @@ common_install_aur tomb
 common_install_aur otf-font-awesome-4
 
 systemctl enable sddm.service
-# fix pinentry symbolic link
-rm /usr/bin/pinentry && ln -s /usr/bin/pinentry-qt /usr/bin/pinentry
 
-common_remove_yay_user
+common_remove_paru_user
 common_services
 common_networkmanager_iwd
 common_keymap
