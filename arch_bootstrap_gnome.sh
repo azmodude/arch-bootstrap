@@ -28,7 +28,7 @@ pacman -S --needed --noconfirm gnome gnome-extra gtk2
 # aur
 common_install_aur tomb
 
-systemctl enable gdm.service
+systemctl enable gdm.service NetworkManager NetworkManager-dispatcher
 
 common_remove_yay_user
 common_services
