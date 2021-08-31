@@ -98,7 +98,7 @@ common_user() {
 }
 
 common_add_paru_user() {
-    useradd -m -p paru paru
+    useradd -m paru
     echo "paru ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/paru
     mkdir /home/paru/.gnupg &&
         echo "keyserver-options auto-key-retrieve" > \
