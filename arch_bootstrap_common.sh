@@ -11,12 +11,7 @@ additional_groups=wheel,users
 usersgid=100
 shell=zsh
 
-packager="Gordon Schulz <gordon.schulz@gmail.com>"
-
-# Custom Repository variables
-gpgkeyid=2500B0062F13CADEEB199BE2A1A520A41200F7A8
-repourl=http://olympus.azmo.ninja:9912
-reponame=azmo
+packager="Gordon Schulz <gordon@gordonschulz.de>"
 
 common_set_time() {
     timedatectl set-ntp true
@@ -29,21 +24,6 @@ common_reflector() {
     pacman -Suy --noconfirm && pacman -S --needed --noconfirm reflector
     reflector --verbose --latest 15 --sort rate --protocol https \
         --country DE --country NL --save /etc/pacman.d/mirrorlist
-}
-
-common_custom_repo() {
-    # Get custom Repository key and lsign it
-    pacman-key --keyserver hkps://eu.pool.sks-keyservers.net \
-        --recv-keys ${gpgkeyid}
-    pacman-key --lsign-key ${gpgkeyid}
-    # Enable custom Repository in pacman.conf
-    if ! grep -E -q "^\\[${reponame}\\]" /etc/pacman.conf; then
-        cat >>/etc/pacman.conf <<-EOF
-			[${reponame}]
-			SigLevel = Required TrustedOnly
-			Server = ${repourl}
-		EOF
-    fi
 }
 
 common_essential() {
