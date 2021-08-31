@@ -19,8 +19,8 @@ else
 fi
 common_user_subuidgid
 common_makepkg_conf
-common_add_yay_user
-common_install_yay
+common_add_paru_user
+common_install_paru
 common_graphical
 
 # install i3 and needed packages
@@ -33,7 +33,7 @@ pacman -S --needed --noconfirm i3-gaps i3status \
 # aur
 common_install_aur tomb i3lock-fancy-git
 
-common_remove_yay_user
+common_remove_paru_user
 common_services
 common_networkmanager_iwd
 common_keymap
