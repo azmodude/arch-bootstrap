@@ -17,6 +17,7 @@ if lsmod | grep -q zfs; then
 else
     common_user
 fi
+common_user_subuidgid
 common_makepkg_conf
 common_add_yay_user
 common_install_yay

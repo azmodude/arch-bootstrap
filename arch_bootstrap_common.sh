@@ -97,6 +97,11 @@ common_user() {
     fi
 }
 
+common_user_subuidgid() {
+    usermod --add-subuids 100000-665535 --add-subgids 100000-665535 "${user}"
+    usermod --add-subuids 100000-665535 --add-subgids 100000-665535 root
+}
+
 common_add_paru_user() {
     useradd -m paru
     echo "paru ALL=(ALL) NOPASSWD: /usr/bin/pacman" >/etc/sudoers.d/paru

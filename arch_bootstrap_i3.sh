@@ -12,7 +12,12 @@ source "${curdir}/arch_bootstrap_common.sh"
 common_set_time
 common_reflector
 common_essential
-common_user
+if lsmod | grep -q zfs; then
+    common_user_zfs
+else
+    common_user
+fi
+common_user_subuidgid
 common_makepkg_conf
 common_add_yay_user
 common_install_yay
