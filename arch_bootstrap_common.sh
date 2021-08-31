@@ -166,4 +166,3 @@ common_makepkg_conf() {
     # change default compression to zstd
     sed -i -r "s/^PKGEXT='.*'$/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
 
-}
