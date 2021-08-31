@@ -37,11 +37,14 @@ common_graphical() {
     # Essential stuff (graphical)
     grep vendor_id /proc/cpuinfo | grep -q Intel && is_intel_cpu=1
     lspci -k | grep -E "(VGA|3D)" | grep -i nvidia && has_nvidia_card=1
+    lspci -k | grep -E "(VGA|3D)" | grep -i AMD && has_amd_card=1
     declare -a graphic_packages
     [[ "${is_intel_cpu}" ]] &&
         graphic_packages=("xf86-video-intel" "vulkan-intel" "libva-intel-driver" "libva" "libvdpau-va-gl")
     [[ "${has_nvidia_card}" ]] &&
         graphic_packages=("nvidia" "nvidia-utils" "libva-vdpau-driver")
+    [[ "${has_amd_card}" ]] &&
+        graphic_packages=("mesa" "xf86-video-amdgpu" "vulkan-radeon" "libva-mesa-driver" "mesa-vdpau")
     pacman -S --needed --noconfirm mesa xf86-input-libinput xorg xorg-xinit \
         xterm "${graphic_packages[@]}"
 }
