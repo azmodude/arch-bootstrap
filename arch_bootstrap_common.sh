@@ -98,8 +98,9 @@ common_user() {
 }
 
 common_user_subuidgid() {
-    usermod --add-subuids 100000-665535 --add-subgids 100000-665535 "${user}"
-    usermod --add-subuids 100000-665535 --add-subgids 100000-665535 root
+    touch /etc/subuid /etc/subgid
+    usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "${user}"
+    usermod --add-subuids 100000-165535 --add-subgids 100000-165535 root
 }
 
 common_add_paru_user() {
