@@ -38,3 +38,5 @@ common_services
 common_networkmanager_iwd
 common_keymap
 common_lightdm
+
+systemctl enable NetworkManager NetworkManager-dispatcher

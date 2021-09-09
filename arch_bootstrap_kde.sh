@@ -29,9 +29,9 @@ pacman -S --needed --noconfirm plasma-meta konsole dolphin \
 # aur
 common_install_aur tomb
 
-systemctl enable sddm.service NetworkManager NetworkManager-dispatcher
-
 common_remove_paru_user
 common_services
 common_networkmanager_iwd
 common_keymap
+
+systemctl enable sddm.service NetworkManager NetworkManager-dispatcher
