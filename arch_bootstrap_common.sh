@@ -30,7 +30,8 @@ common_essential() {
     # Essential stuff (terminal)
     pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
         iwd systemd-resolvconf zsh lsb-release git git-crypt \
-        xclip xsel neovim python-neovim tmux networkmanager chezmoi
+        xclip xsel neovim python-neovim tmux networkmanager chezmoi \
+        pipewire pipewire-pulse pipewire-alsa
 }
 
 common_graphical() {
