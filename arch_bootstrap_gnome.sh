@@ -24,7 +24,8 @@ common_install_yay
 common_graphical
 
 # install gnome
-pacman -S --needed --noconfirm gnome gnome-extra gtk2
+pacman -S --needed --noconfirm gnome gnome-extra gtk2 pipewire pipewire-pulse \
+    pipewire-zeroconf gst-plugin-pipewire
 
 # aur
 common_install_aur tomb

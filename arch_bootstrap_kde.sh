@@ -25,7 +25,8 @@ common_graphical
 
 # install plasma
 pacman -S --needed --noconfirm plasma-meta konsole dolphin \
-    kdegraphics-thumbnailers ffmpegthumbs gtk2
+    kdegraphics-thumbnailers ffmpegthumbs pipewire pipewire-pulse gst-plugin-pipewire \
+    pipewire-zeroconf
 # aur
 common_install_aur tomb
 

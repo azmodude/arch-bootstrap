@@ -25,10 +25,11 @@ common_graphical
 
 # install i3 and needed packages
 pacman -S --needed --noconfirm i3-gaps i3status \
-    arandr pavucontrol pulseaudio xss-lock \
+    arandr pavucontrol xss-lock \
     maim wmctrl gtk4 gtk3 gtk2 udiskie dunst rofi picom gnome-themes-extra \
     adwaita-icon-theme polkit-gnome brightnessctl feh kitty lightdm \
-    lightdm-webkit2-greeter light-locker
+    lightdm-webkit2-greeter pipewire-pulse pipewire gst-plugin-pipewire \
+    pipewire-zeroconf
 
 # aur
 common_install_aur tomb i3lock-fancy-git
