@@ -30,7 +30,7 @@ pacman -S --needed --noconfirm i3-gaps i3status \
     maim wmctrl gtk4 gtk3 gtk2 udiskie dunst rofi picom gnome-themes-extra \
     adwaita-icon-theme polkit-gnome brightnessctl feh kitty lightdm \
     lightdm-webkit2-greeter pipewire-pulse pipewire gst-plugin-pipewire \
-    pipewire-zeroconf
+    pipewire-zeroconf wireplumber
 
 # aur
 common_install_aur tomb i3lock-fancy-git
