@@ -28,9 +28,9 @@ common_reflector() {
 
 common_essential() {
     # Essential stuff (terminal)
-    pacman -S --needed --noconfirm base-devel sudo ansible openssh gpm \
-        iwd systemd-resolvconf zsh lsb-release git git-crypt \
-        xclip xsel neovim python-neovim tmux networkmanager chezmoi
+    pacman -S --needed --noconfirm base-devel sudo openssh gpm \
+        iwd systemd-resolvconf zsh lsb-release git \
+        xclip xsel wl-clipboard neovim python-neovim tmux networkmanager chezmoi
 }
 
 common_graphical() {
