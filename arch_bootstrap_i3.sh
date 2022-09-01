@@ -19,6 +19,7 @@ else
 fi
 common_user_subuidgid
 common_makepkg_conf
+common_add_chaotic_aur
 common_add_paru_user
 common_install_paru
 common_graphical
