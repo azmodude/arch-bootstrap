@@ -13,6 +13,19 @@ shell=zsh
 
 packager="Gordon Schulz <gordon@gordonschulz.de>"
 
+common_add_chaotic_aur() {
+  pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+  pacman-key --lsign-key FBA220DFC880C036
+  pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+  if ! grep -q chaotic-aur /etc/pacman.conf; then
+    cat >> "/etc/pacman.conf" <<-EOF
+      [chaotic-aur]
+      Include = /etc/pacman.d/chaotic-mirrorlist
+		EOF
+  fi
+}
+
 common_set_time() {
     timedatectl set-ntp true
     hwclock --systohc
@@ -115,9 +128,13 @@ common_add_paru_user() {
         chmod 700 /home/paru/.gnupg
 }
 common_install_paru() {
+  if ! grep -q "chaotic-aur" /etc/pacman.conf; then
     tmpdir=$(mktemp -d) && chown -R paru "${tmpdir}"
     su -l -c "git clone https://aur.archlinux.org/paru-bin.git ${tmpdir}" paru
     su -l -c "cd ${tmpdir} && makepkg -srci --noconfirm --needed" paru
+  else
+    pacman -S --needed --noconfirm paru
+  fi
 }
 common_remove_paru_user() {
     userdel -rf paru
