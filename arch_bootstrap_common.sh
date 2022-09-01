@@ -16,7 +16,7 @@ packager="Gordon Schulz <gordon@gordonschulz.de>"
 common_add_chaotic_aur() {
   pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
   pacman-key --lsign-key FBA220DFC880C036
-  pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+  pacman --noconfirm --needed -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 
   if ! grep -q chaotic-aur /etc/pacman.conf; then
     cat >> "/etc/pacman.conf" <<-EOF
@@ -24,6 +24,7 @@ common_add_chaotic_aur() {
       Include = /etc/pacman.d/chaotic-mirrorlist
 		EOF
   fi
+  pacman -Sy --noconfirm
 }
 
 common_set_time() {
