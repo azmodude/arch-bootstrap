@@ -149,7 +149,7 @@ common_install_aur() {
 
 common_services() {
     # enable mandatory services
-    systemctl enable --now gpm sshd systemd-resolved systemd-networkd iwd
+    systemctl enable --now gpm sshd systemd-resolved systemd-networkd
     # create link to systemd-resolved stub
     ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 }
